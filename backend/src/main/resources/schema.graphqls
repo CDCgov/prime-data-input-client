@@ -245,8 +245,8 @@ type Mutation {
     employedInHealthcare: Boolean!
   ): String
   setPatientIsDeleted(id: String!, deleted: Boolean!): Patient
-  addTestResult(deviceId: String!, result: String!, patientId: String!, dateTested: String): String
-  editQueueItem(id: String!, deviceId: String, result: String, dateTested: String): TestOrder
+  addTestResult(deviceId: String!, result: String!, patientId: String!, dateTested: DateTime): String
+  editQueueItem(id: String!, deviceId: String, result: String, dateTested: DateTime): TestOrder
   addPatientToQueue(
     facilityId: String!
     patientId: String!

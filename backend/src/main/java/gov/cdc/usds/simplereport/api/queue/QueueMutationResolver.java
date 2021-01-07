@@ -7,7 +7,6 @@ import java.util.HashMap;
 import java.util.Iterator;
 import java.util.Map;
 import java.util.UUID;
-import java.time.ZoneId;
 import java.util.Date;
 
 import org.json.JSONException;
@@ -34,21 +33,21 @@ public class QueueMutationResolver implements GraphQLMutationResolver  {
       _ps = ps;
     }
 
-    public void addTestResult(String deviceID, String result, String patientID, String dateTested) {
+    public void addTestResult(String deviceID, String result, String patientID, Date dateTested) {
       _tos.addTestResult(
         deviceID,
         TestResult.valueOf(result),
         patientID,
-        parseUserDate(dateTested) == null ? null : Date.from(parseUserDate(dateTested).atStartOfDay(ZoneId.systemDefault()).toInstant())
+        dateTested
       );
     }
 
-    public ApiTestOrder editQueueItem(String id, String deviceId, String result, String dateTested) {
+    public ApiTestOrder editQueueItem(String id, String deviceId, String result, Date dateTested) {
         return new ApiTestOrder(_tos.editQueueItem(
             id,
             deviceId,
             result,
-            parseUserDate(dateTested) == null ? null : Date.from(parseUserDate(dateTested).atStartOfDay(ZoneId.systemDefault()).toInstant())
+            dateTested
         ));
     }
 
