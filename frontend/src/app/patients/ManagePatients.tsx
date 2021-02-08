@@ -1,5 +1,5 @@
 import { gql, useQuery } from "@apollo/client";
-import React from "react";
+import React, { useState } from "react";
 import { NavLink } from "react-router-dom";
 import moment from "moment";
 import { displayFullName } from "../utils";
@@ -11,6 +11,10 @@ import {
 import { daysSince } from "../utils/date";
 import { FontAwesomeIcon } from "@fortawesome/react-fontawesome";
 import PatientUpload from "./PatientUpload";
+import ArchivePersonModal from "./ArchivePersonModal";
+import { Menu, MenuButton, MenuItem } from "@szhsin/react-menu";
+import { faEllipsisH } from "@fortawesome/free-solid-svg-icons";
+import "./ManagePatients.scss";
 
 const patientQuery = gql`
   query GetPatientsByFacility($facilityId: String!) {
@@ -54,7 +58,20 @@ const ManagePatients = ({ activeFacilityId, canEditUser }: Props) => {
       facilityId: activeFacilityId,
     },
   });
+  const [archivePerson, setArchivePerson] = useState<object | null>(null);
 
+  if (archivePerson) {
+    return (
+      <ArchivePersonModal
+        person={archivePerson}
+        closeModal={() => {
+          setArchivePerson(null);
+          refetch();
+        }}
+      />
+    );
+  }
+  //TODO: only if have permissions!!!!!!!!!!!!!!!!!!!!!!!!!!!!
   const patientRows = (patients: Patient[]) => {
     return patients.map((patient: Patient) => {
       let fullName = displayFullName(
@@ -74,13 +91,27 @@ const ManagePatients = ({ activeFacilityId, canEditUser }: Props) => {
       );
 
       return (
-        <tr key={patient.internalId}>
+        <tr key={patient.internalId} className="sr-patient-row">
           <th scope="row">{editUserLink}</th>
           <td> {patient.birthDate}</td>
           <td>
             {patient.lastTest
               ? `${daysSince(moment(patient.lastTest.dateAdded))}`
               : "N/A"}
+          </td>
+          <td>
+            <Menu
+              menuButton={
+                <MenuButton className="sr-modal-menu-button">
+                  <FontAwesomeIcon icon={faEllipsisH} size="2x" />
+                  <span className="usa-sr-only">More actions</span>
+                </MenuButton>
+              }
+            >
+              <MenuItem onClick={() => setArchivePerson(patient)}>
+                Archive this record
+              </MenuItem>
+            </Menu>
           </td>
         </tr>
       );
@@ -105,7 +136,7 @@ const ManagePatients = ({ activeFacilityId, canEditUser }: Props) => {
                 </NavLink>
               ) : null}
             </div>
-            <div className="usa-card__body">
+            <div className="usa-card__body sr-patient-list">
               {error ? (
                 <p>Error in loading patients</p>
               ) : loading ? (
@@ -117,6 +148,7 @@ const ManagePatients = ({ activeFacilityId, canEditUser }: Props) => {
                       <th scope="col">Name</th>
                       <th scope="col">Date of Birth</th>
                       <th scope="col">Days since last test</th>
+                      <th scope="col">Actions</th>
                     </tr>
                   </thead>
                   <tbody>{patientRows(data.patients)}</tbody>

@@ -1,0 +1,21 @@
+.sr-patient-list {
+  .sr-patient-row th,
+  .sr-patient-row td {
+    /* override USWDS force-white */
+    background: inherit;
+  }
+
+  .sr-patient-row:hover {
+    background: #f4f4f4;
+  }
+
+  .sr-patient-row--removed {
+    text-decoration: line-through;
+  }
+
+  .rc-menu-button {
+    background: inherit;
+    padding: 0;
+    border: 0;
+  }
+}

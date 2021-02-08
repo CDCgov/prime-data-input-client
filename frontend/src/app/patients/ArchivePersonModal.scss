@@ -1,0 +1,29 @@
+.sr-archive-person-buttons {
+  display: flex;
+  justify-content: flex-end;
+
+  & button:last-child {
+    margin: 0 0 0 1.5rem;
+  }
+}
+
+.sr-archive-person-modal-content {
+  background: #fff;
+  max-width: 30em;
+  max-height: 90vh;
+  inset: 3em auto auto auto;
+  padding: 0.4in;
+}
+
+.sr-archive-person-modal-overlay {
+  display: flex;
+  justify-content: center;
+  align-items: center;
+  background-color: rgba(0, 0, 0, 0.8);
+  position: fixed;
+  top: 0;
+  left: 0;
+  right: 0;
+  bottom: 0;
+  z-index: 1000;
+}
