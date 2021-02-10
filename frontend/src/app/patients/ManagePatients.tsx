@@ -71,7 +71,7 @@ const ManagePatients = ({ activeFacilityId, canEditUser }: Props) => {
       />
     );
   }
-  //TODO: only if have permissions!!!!!!!!!!!!!!!!!!!!!!!!!!!!
+
   const patientRows = (patients: Patient[]) => {
     return patients.map((patient: Patient) => {
       let fullName = displayFullName(
@@ -100,18 +100,20 @@ const ManagePatients = ({ activeFacilityId, canEditUser }: Props) => {
               : "N/A"}
           </td>
           <td>
-            <Menu
-              menuButton={
-                <MenuButton className="sr-modal-menu-button">
-                  <FontAwesomeIcon icon={faEllipsisH} size="2x" />
-                  <span className="usa-sr-only">More actions</span>
-                </MenuButton>
-              }
-            >
-              <MenuItem onClick={() => setArchivePerson(patient)}>
-                Archive this record
-              </MenuItem>
-            </Menu>
+            {canEditUser && (
+              <Menu
+                menuButton={
+                  <MenuButton className="sr-modal-menu-button">
+                    <FontAwesomeIcon icon={faEllipsisH} size="2x" />
+                    <span className="usa-sr-only">More actions</span>
+                  </MenuButton>
+                }
+              >
+                <MenuItem onClick={() => setArchivePerson(patient)}>
+                  Archive this record
+                </MenuItem>
+              </Menu>
+            )}
           </td>
         </tr>
       );
