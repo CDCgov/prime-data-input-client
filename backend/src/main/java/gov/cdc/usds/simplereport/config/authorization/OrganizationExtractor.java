@@ -29,6 +29,8 @@ public class OrganizationExtractor
 
     @Override
     public List<OrganizationRoleClaims> convert(Collection<? extends GrantedAuthority> source) {
+        LOG.info("AUTHS\n\n\n\n\n\n\n\n");
+        source.forEach(a->{LOG.info("AUTH="+a.getAuthority());});
         Map<String, EnumSet<OrganizationRole>> rolesFound = new HashMap<>();
         for (GrantedAuthority granted : source) {
             String claimed = granted.getAuthority();
