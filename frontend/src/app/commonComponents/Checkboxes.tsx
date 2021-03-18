@@ -85,6 +85,19 @@ const Checkboxes = (props: Props) => {
               name={name}
               ref={inputRef}
               disabled={disabled || props.disabled}
+              onFocus={(e) => {
+                let target = e.target;
+                target.scrollIntoView();
+                if(target){
+                  let topPos = target.offsetTop;
+                  let modal = target.closest('.ReactModal__Content');
+                  console.log(modal);
+                  if(modal)
+                    modal.scrollTop -= 10;
+                  console.log(topPos);
+                }
+                console.log(e.target);
+              }}
               {...inputProps}
             />
             <label className="usa-checkbox__label" htmlFor={checkboxIds[i]}>
