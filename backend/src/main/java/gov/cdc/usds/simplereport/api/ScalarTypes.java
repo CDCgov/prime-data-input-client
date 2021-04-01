@@ -21,4 +21,13 @@ public class ScalarTypes {
         .coercing(new TelephoneNumberCoercing())
         .build();
   }
+
+  @Bean
+  public GraphQLScalarType trimmedStringScalar() {
+    return GraphQLScalarType.newScalar()
+        .name("TrimmedString")
+        .description("A string whose leading and trailing whitespace will be automatically removed")
+        .coercing(new TrimmedStringCoercing())
+        .build();
+  }
 }
