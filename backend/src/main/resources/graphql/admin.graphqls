@@ -41,7 +41,7 @@ extend type Mutation {
       @deprecated(reason: "county is derived from smarty streets lookup")
     state: String!
     zipCode: String!
-    phone: String
+    phone: TelephoneNumber
     email: String
     orderingProviderFirstName: String
     orderingProviderMiddleName: String
@@ -55,7 +55,7 @@ extend type Mutation {
       @deprecated(reason: "county is derived from smarty streets lookup")
     orderingProviderState: String
     orderingProviderZipCode: String
-    orderingProviderPhone: String
+    orderingProviderPhone: TelephoneNumber
     deviceTypes: [String]!
     defaultDevice: String!
   ): Organization

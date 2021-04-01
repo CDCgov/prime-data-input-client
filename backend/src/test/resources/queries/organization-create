@@ -3,7 +3,7 @@ mutation addOrg($deviceId: String!) {
     name: "New Org, New Org, a Wonderful Town"
     externalId: "nyc.gov"
     testingFacilityName: "Nice Place"
-    cliaNumber: "123457890987654321"
+    cliaNumber: "12D3456789"
     street: "123 Main Street"
     city: "Nowheresville"
     county: "N/A"

@@ -32,7 +32,7 @@ const CREATE_ORGANIZATION_MUTATION = gql`
     $city: String
     $state: String!
     $zipCode: String!
-    $phone: String
+    $phone: TelephoneNumber
     $email: String
     $orderingProviderFirstName: String
     $orderingProviderMiddleName: String
@@ -44,7 +44,7 @@ const CREATE_ORGANIZATION_MUTATION = gql`
     $orderingProviderCity: String
     $orderingProviderState: String
     $orderingProviderZipCode: String
-    $orderingProviderPhone: String
+    $orderingProviderPhone: TelephoneNumber
     $deviceTypes: [String]!
     $defaultDevice: String!
   ) {

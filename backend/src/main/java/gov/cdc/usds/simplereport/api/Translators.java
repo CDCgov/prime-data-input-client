@@ -2,6 +2,7 @@ package gov.cdc.usds.simplereport.api;
 
 import com.google.i18n.phonenumbers.NumberParseException;
 import com.google.i18n.phonenumbers.PhoneNumberUtil;
+import com.google.i18n.phonenumbers.PhoneNumberUtil.PhoneNumberFormat;
 import gov.cdc.usds.simplereport.api.model.errors.IllegalGraphqlArgumentException;
 import gov.cdc.usds.simplereport.db.model.auxiliary.PersonRole;
 import java.time.LocalDate;
@@ -10,6 +11,7 @@ import java.time.format.DateTimeParseException;
 import java.util.HashMap;
 import java.util.Iterator;
 import java.util.Map;
+import java.util.Optional;
 import java.util.Set;
 import java.util.UUID;
 import java.util.stream.Collectors;
@@ -25,6 +27,7 @@ public class Translators {
   private static final DateTimeFormatter US_SLASHDATE_SHORT_FORMATTER =
       DateTimeFormatter.ofPattern("M/d/yyyy");
   private static final int MAX_STRING_LENGTH = 500;
+  private static final PhoneNumberUtil PHONE_NUMBER_UTIL = PhoneNumberUtil.getInstance();
 
   public static final LocalDate parseUserShortDate(String d) {
     String date = parseString(d);
@@ -38,18 +41,20 @@ public class Translators {
     }
   }
 
-  public static String parsePhoneNumber(String userSuppliedPhoneNumber) {
-    if (userSuppliedPhoneNumber == null) {
+  public static String parsePhoneNumber(String inputValue) {
+    if (Optional.ofNullable(inputValue).map(String::isBlank).orElse(true)) {
       return null;
     }
 
     try {
-      var phoneUtil = PhoneNumberUtil.getInstance();
-      return phoneUtil.format(
-          phoneUtil.parse(userSuppliedPhoneNumber, "US"),
-          PhoneNumberUtil.PhoneNumberFormat.NATIONAL);
+      var parsed = PHONE_NUMBER_UTIL.parse(inputValue, "US");
+      if (PHONE_NUMBER_UTIL.isValidNumber(parsed)) {
+        return PHONE_NUMBER_UTIL.format(parsed, PhoneNumberFormat.NATIONAL);
+      }
+
+      throw IllegalGraphqlArgumentException.invalidInput(inputValue, "TelephoneNumber");
     } catch (NumberParseException parseException) {
-      throw IllegalGraphqlArgumentException.invalidInput(userSuppliedPhoneNumber, "phone number");
+      throw IllegalGraphqlArgumentException.invalidInput(inputValue, "TelephoneNumber");
     }
   }
 

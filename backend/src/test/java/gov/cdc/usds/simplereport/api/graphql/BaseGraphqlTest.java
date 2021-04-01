@@ -227,7 +227,10 @@ public abstract class BaseGraphqlTest extends BaseFullStackTest {
       _lastResponse = response.getRawResponse();
       JsonNode responseBody = response.readTree();
       assertGraphQLOutcome(responseBody, expectedError);
-      return (ObjectNode) responseBody.get("data");
+      return Optional.ofNullable(responseBody.get("data"))
+          .filter(ObjectNode.class::isInstance)
+          .map(ObjectNode.class::cast)
+          .orElse(null);
     } catch (IOException e) {
       throw new RuntimeException(e);
     }

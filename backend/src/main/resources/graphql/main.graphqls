@@ -21,7 +21,7 @@ type Facility {
   county: String
   state: String
   zipCode: String
-  phone: String
+  phone: TelephoneNumber
   email: String
   deviceTypes: [DeviceType]
   defaultDeviceType: DeviceType
@@ -40,7 +40,7 @@ type Provider {
   county: String
   state: String
   zipCode: String
-  phone: String
+  phone: TelephoneNumber
 }
 
 type DeviceType {
@@ -111,7 +111,7 @@ type Patient
   county: String @requiredPermissions(allOf: ["READ_PATIENT_LIST"])
   state: String @requiredPermissions(allOf: ["READ_PATIENT_LIST"])
   zipCode: String @requiredPermissions(allOf: ["READ_PATIENT_LIST"])
-  telephone: String
+  telephone: TelephoneNumber
     @requiredPermissions(anyOf: ["READ_PATIENT_LIST", "UPDATE_TEST"])
   email: String
     @requiredPermissions(anyOf: ["READ_PATIENT_LIST", "UPDATE_TEST"])
@@ -223,7 +223,7 @@ type Mutation {
       @deprecated(reason: "county is derived from smarty streets lookup")
     state: String!
     zipCode: String!
-    phone: String
+    phone: TelephoneNumber
     email: String
     orderingProviderFirstName: String
     orderingProviderMiddleName: String
@@ -237,7 +237,7 @@ type Mutation {
       @deprecated(reason: "county is derived from smarty streets lookup")
     orderingProviderState: String
     orderingProviderZipCode: String
-    orderingProviderPhone: String
+    orderingProviderPhone: TelephoneNumber
     deviceTypes: [String]!
     defaultDevice: String!
   ): String @requiredPermissions(allOf: ["EDIT_FACILITY"])
@@ -251,7 +251,7 @@ type Mutation {
       @deprecated(reason: "county is derived from smarty streets lookup")
     state: String!
     zipCode: String!
-    phone: String
+    phone: TelephoneNumber
     email: String
     orderingProviderFirstName: String
     orderingProviderMiddleName: String
@@ -265,7 +265,7 @@ type Mutation {
       @deprecated(reason: "county is derived from smarty streets lookup")
     orderingProviderState: String
     orderingProviderZipCode: String
-    orderingProviderPhone: String
+    orderingProviderPhone: TelephoneNumber
     deviceTypes: [String]!
     defaultDevice: String!
   ): String @requiredPermissions(allOf: ["EDIT_FACILITY"])
@@ -309,7 +309,7 @@ type Mutation {
     city: String
     state: String!
     zipCode: String!
-    telephone: String!
+    telephone: TelephoneNumber!
     role: String
     email: String
     county: String
@@ -338,7 +338,7 @@ type Mutation {
         regexp: "[0-9]{5}(-[0-9]{4})?"
         message: "Use ZIP or ZIP+4 format"
       )
-    telephone: String!
+    telephone: TelephoneNumber!
     role: String @Size(min: 0, max: 32)
     email: String @Size(min: 3, max: 254)
     county: String

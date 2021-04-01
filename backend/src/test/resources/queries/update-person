@@ -10,7 +10,7 @@ mutation updatePatient(
     $city: String = "Winterfell",
     $state: String = "NY",
     $zipCode: String = "00000",
-    $telephone: String = "(900)-GOT-STUBBLE",
+    $telephone: TelephoneNumber = "(900)-867-5309",
     $role: String = "staff",
     $flagCongregate: Boolean = true,
     $flagHealthcare: Boolean = false,

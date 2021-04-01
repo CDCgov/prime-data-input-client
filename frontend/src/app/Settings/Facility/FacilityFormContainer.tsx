@@ -64,7 +64,7 @@ const UPDATE_FACILITY_MUTATION = gql`
     $city: String
     $state: String!
     $zipCode: String!
-    $phone: String
+    $phone: TelephoneNumber
     $email: String
     $orderingProviderFirstName: String
     $orderingProviderMiddleName: String
@@ -76,7 +76,7 @@ const UPDATE_FACILITY_MUTATION = gql`
     $orderingProviderCity: String
     $orderingProviderState: String
     $orderingProviderZipCode: String
-    $orderingProviderPhone: String
+    $orderingProviderPhone: TelephoneNumber
     $devices: [String]!
     $defaultDevice: String!
   ) {
@@ -117,7 +117,7 @@ const ADD_FACILITY_MUTATION = gql`
     $city: String
     $state: String!
     $zipCode: String!
-    $phone: String
+    $phone: TelephoneNumber
     $email: String
     $orderingProviderFirstName: String
     $orderingProviderMiddleName: String
@@ -129,7 +129,7 @@ const ADD_FACILITY_MUTATION = gql`
     $orderingProviderCity: String
     $orderingProviderState: String
     $orderingProviderZipCode: String
-    $orderingProviderPhone: String
+    $orderingProviderPhone: TelephoneNumber
     $devices: [String]!
     $defaultDevice: String!
   ) {

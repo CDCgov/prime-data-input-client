@@ -17,6 +17,7 @@ import graphql.execution.instrumentation.parameters.InstrumentationExecutionPara
 import graphql.kickstart.servlet.context.GraphQLServletContext;
 import java.util.ArrayList;
 import java.util.List;
+import java.util.Objects;
 import java.util.stream.Collectors;
 import javax.security.auth.Subject;
 import org.slf4j.Logger;
@@ -81,8 +82,8 @@ public class AuditLoggingInstrumentation extends SimpleInstrumentation {
       List<String> errorPaths =
           result.getErrors().stream()
               .map(GraphQLError::getPath)
-              .flatMap(List::stream)
-              .map(Object::toString)
+              .filter(Objects::nonNull)
+              .map(path -> path.stream().map(Object::toString).collect(Collectors.joining("/")))
               .collect(Collectors.toList());
       try {
         _auditService.logGraphQlEvent(

@@ -10,7 +10,7 @@ mutation patientLinkUpdatePatient($internalId: String!
     $city: String
     $state: String!
     $zipCode: String!
-    $telephone: String!
+    $telephone: TelephoneNumber!
     $role: String
     $email: String
     $county: String

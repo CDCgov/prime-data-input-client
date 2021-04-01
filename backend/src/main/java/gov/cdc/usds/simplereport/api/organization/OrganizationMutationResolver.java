@@ -81,7 +81,7 @@ public class OrganizationMutationResolver implements GraphQLMutationResolver {
             testingFacilityName,
             cliaNumber,
             facilityAddress,
-            Translators.parsePhoneNumber(phone),
+            phone,
             Translators.parseEmail(email),
             deviceSpecimenTypes,
             providerName,
@@ -136,7 +136,7 @@ public class OrganizationMutationResolver implements GraphQLMutationResolver {
             testingFacilityName,
             cliaNumber,
             facilityAddress,
-            Translators.parsePhoneNumber(phone),
+            phone,
             Translators.parseEmail(email),
             orderingProviderFirstName,
             orderingProviderMiddleName,
@@ -144,7 +144,7 @@ public class OrganizationMutationResolver implements GraphQLMutationResolver {
             orderingProviderSuffix,
             orderingProviderNPI,
             providerAddress,
-            Translators.parsePhoneNumber(orderingProviderTelephone),
+            orderingProviderTelephone,
             deviceSpecimenTypes);
     return new ApiFacility(facility);
   }
@@ -202,12 +202,12 @@ public class OrganizationMutationResolver implements GraphQLMutationResolver {
             testingFacilityName,
             cliaNumber,
             facilityAddress,
-            Translators.parsePhoneNumber(phone),
+            phone,
             Translators.parseEmail(email),
             deviceSpecimenTypes,
             providerName,
             providerAddress,
-            Translators.parsePhoneNumber(orderingProviderTelephone),
+            orderingProviderTelephone,
             orderingProviderNPI);
     List<Facility> facilities = _os.getFacilities(org);
     return new ApiOrganization(org, facilities);

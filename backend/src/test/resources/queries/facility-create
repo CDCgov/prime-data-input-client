@@ -1,7 +1,7 @@
 mutation addFac($deviceId: String!) {
   addFacility(
     testingFacilityName: "Nice Place"
-    cliaNumber: "123457890987654321"
+    cliaNumber: "12D3456789"
     street: "123 Main Street"
     city: "Nowheresville"
     county: "N/A"

@@ -28,7 +28,7 @@ export const ADD_PATIENT = gql`
     $city: String
     $state: String!
     $zipCode: String!
-    $telephone: String!
+    $telephone: TelephoneNumber!
     $role: String
     $lookupId: String
     $email: String
