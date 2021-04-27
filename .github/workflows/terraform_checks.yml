@@ -33,20 +33,18 @@ jobs:
           terraform_version: 0.15.1
       - name: Terraform Init
         run: |
-          pushd dev; pushd persistent; terraform init -backend=false; popd; terraform init -backend=false; popd
-          pushd test; pushd persistent; terraform init -backend=false; popd; terraform init -backend=false; popd
-          pushd demo; pushd persistent; terraform init -backend=false; popd; terraform init -backend=false; popd
-          pushd stg; pushd persistent; terraform init -backend=false; popd; terraform init -backend=false; popd
-          pushd prod; pushd persistent; terraform init -backend=false; popd; terraform init -backend=false; popd
-          pushd pentest; pushd persistent; terraform init -backend=false; popd; terraform init -backend=false; popd
-          pushd global; terraform init -backend=false;
+          for d in dev dev/persistent test test/persistent demo demo/persistent training training/persistent \
+            stg stg/persistent pentest pentest/persistent prod prod/persistent global
+          do
+            echo "Initializing $d";
+            (cd $d && terraform init -backend=false)
+          done
 
       - name: Terraform Validate
         run: |
-          pushd dev; pushd persistent; echo $PWD && terraform validate -no-color; popd; echo $PWD && terraform validate -no-color; popd
-          pushd test; pushd persistent; echo $PWD && terraform validate -no-color; popd; echo $PWD && terraform validate -no-color; popd
-          pushd demo; pushd persistent; echo $PWD && terraform validate -no-color; popd; echo $PWD && terraform validate -no-color; popd
-          pushd stg; pushd persistent; echo $PWD && terraform validate -no-color; popd; echo $PWD && terraform validate -no-color; popd
-          pushd prod; pushd persistent; echo $PWD && terraform validate -no-color; popd; echo $PWD && terraform validate -no-color; popd
-          pushd pentest; pushd persistent; echo $PWD && terraform validate -no-color; popd; echo $PWD && terraform validate -no-color; popd
-          pushd global; echo $PWD && terraform validate -no-color;
+          for d in dev dev/persistent test test/persistent demo demo/persistent training training/persistent \
+            stg stg/persistent pentest pentest/persistent prod prod/persistent global
+          do
+            echo "Validating $d";
+            (cd $d && terraform validate)
+          done

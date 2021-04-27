@@ -22,6 +22,13 @@ defaults:
 jobs:
   test:
     runs-on: ubuntu-latest
+    needs: [test-java, test-node]
+    steps:
+      - name: LOL NOPE
+        working-directory: /
+        run: echo "This is a dummy job to keep the required checks happy"
+  test-java:
+    runs-on: ubuntu-latest
     services:
       test-db:
         image: postgres:12-alpine
@@ -37,8 +44,6 @@ jobs:
           - 5432:5432
     steps:
       - uses: actions/checkout@v2
-        with:
-          fetch-depth: 0 # Disable shallow clones so Sonar can have all the data
       - name: Set up JDK ${{env.JAVA_VERSION}}
         uses: actions/setup-java@v1
         with:
@@ -67,6 +72,13 @@ jobs:
           TWILIO_ACCOUNT_SID: ${{secrets.TWILIO_TEST_ACCOUNT_SID }}
           TWILIO_AUTH_TOKEN: ${{secrets.TWILIO_TEST_AUTH_TOKEN }}
         run: ./gradlew jacocoTestReport -PtestDbPort=5432
+      - name: Save Build Output for Sonar
+        uses: actions/upload-artifact@v2
+        if: success()
+        with:
+          name: java-build-output
+          path: backend/build
+          retention-days: 1
       - name: Archive Test Results
         uses: actions/upload-artifact@v2
         if: failure()
@@ -74,6 +86,10 @@ jobs:
           name: test-report
           path: backend/build/reports/tests/test
           retention-days: 7
+  test-node:
+    runs-on: ubuntu-latest
+    steps:
+      - uses: actions/checkout@v2
       - name: Use Node.js ${{env.NODE_VERSION}}
         uses: actions/setup-node@v2.1.5
         with:
@@ -90,12 +106,37 @@ jobs:
       - name: Test
         working-directory: ./frontend
         run: yarn test:ci
+      - name: Save Build Output for Sonar
+        uses: actions/upload-artifact@v2
+        if: success()
+        with:
+          name: yarn-build-output
+          path: frontend/coverage
+          retention-days: 1
+
+  sonar:
+    runs-on: ubuntu-latest
+    needs: [test-java, test-node]
+    if: ${{ github.actor != 'dependabot[bot]' }}
+    steps:
+      - uses: actions/checkout@v2
+        with:
+          fetch-depth: 0 # Disable shallow clones so Sonar can have all the data
+      - name: Retrieve java build
+        uses: actions/download-artifact@v2
+        with:
+          name: java-build-output
+      - name: Retrieve yarn build
+        uses: actions/download-artifact@v2
+        with:
+          name: yarn-build-output
       - name: Sonar analysis
-        if: ${{ github.actor != 'dependabot[bot]' }}
+        working-directory: ./backend
         env:
           GITHUB_TOKEN: ${{ secrets.GITHUB_TOKEN }} # Needed to get PR information, if any
           SONAR_TOKEN: ${{ secrets.SONAR_TOKEN }}
         run: ./gradlew sonarqube -Dsonar.projectBaseDir=${{ env.PROJECT_ROOT }} --info
+
   build-jar:
     runs-on: ubuntu-latest
     steps:
