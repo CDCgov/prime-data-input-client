@@ -33,7 +33,7 @@ dependencies {
 
     // data validation
     implementation 'com.googlecode.libphonenumber:libphonenumber:8.12.15'
-    implementation 'com.smartystreets.api:smartystreets-java-sdk:3.7.2'
+    implementation 'com.smartystreets.api:smartystreets-java-sdk:3.8.1'
 
     // UI layer dependencies
     implementation "com.graphql-java-kickstart:graphql-spring-boot-starter:${kickstartVersion}"
