@@ -50,7 +50,7 @@ com.okta.spring:okta-spring-sdk:2.0.0
 com.okta.spring:okta-spring-security-oauth2:2.0.0
 com.sendgrid:java-http-client:4.3.6
 com.sendgrid:sendgrid-java:4.7.2
-com.smartystreets.api:smartystreets-java-sdk:3.7.2
+com.smartystreets.api:smartystreets-java-sdk:3.8.1
 com.sun.activation:jakarta.activation:1.2.2
 com.sun.istack:istack-commons-runtime:3.0.11
 com.twilio.sdk:twilio:8.7.0
