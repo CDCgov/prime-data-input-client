@@ -1,0 +1,38 @@
+name : Dependabot Gradle Helper
+on:
+  workflow_dispatch:
+  pull_request:
+    branches: 'dependabot/gradle/**'
+
+env:
+  JAVA_VERSION: 11
+
+defaults:
+  run:
+    working-directory: backend
+
+jobs:
+  update-locks:
+    runs-on: ubuntu-latest
+    steps:
+      - uses: actions/checkout@v2
+        with:
+          fetch-depth: 0 # Disable shallow clones so Sonar can have all the data
+      - name: Set up JDK ${{env.JAVA_VERSION}}
+        uses: actions/setup-java@v1
+        with:
+          java-version: ${{env.JAVA_VERSION}}
+      - name: Configure git commit information
+        run: |
+          git config user.name simplereport-dependabot-helper
+          git config user.email no-reply@simplereport.gov
+      - name: Update dependency locks
+        run: ./gradlew dependencies --write-locks
+      - name: Commit and push changes
+        run: |
+          if ! git diff --quiet --exit-code gradle/dependency-locks; then
+            git commit -m'Updated dependency locks for dependabot.' gradle/dependency-locks
+            git push
+          else
+            echo No dependency changes found: nothing to do.
+          fi
