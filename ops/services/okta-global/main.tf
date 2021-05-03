@@ -38,7 +38,7 @@ resource "okta_policy_signon" "mfa_require" {
   name            = "simple-report-mfa-require"
   status          = "ACTIVE"
   description     = "Require MFA for all users"
-  groups_included = []
+  groups_included = [var.all_users_group_id]
 }
 
 resource "okta_policy_rule_signon" "app_mfa" {

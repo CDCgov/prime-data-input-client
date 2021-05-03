@@ -35,6 +35,8 @@ resource "azurerm_log_analytics_workspace" "sr" {
 // Okta configuration
 module "okta" {
   source = "../services/okta-global"
+
+  all_users_group_id = data.okta_group.everyone.id
 }
 
 // App Insights for Azure Functions
