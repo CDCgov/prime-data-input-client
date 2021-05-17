@@ -84,10 +84,16 @@ test {
     // people sometimes export this to run local dev more easily: don't let it break the tests
     environment "SPRING_PROFILES_ACTIVE", ""
     useJUnitPlatform()
-    // uncomment this to log to stdout when each test starts, so you can tell what's going on
-    // testLogging {
-    //   events "started", "failed"
-    // }
+    testLogging {
+        // uncomment this to log to stdout when each test starts, so you can tell what's going on
+        //events "started", "failed"
+
+        afterSuite { desc, result ->
+            if (!desc.parent) {
+                println "Test Summary: ${result.successfulTestCount} passed, ${result.failedTestCount} failed"
+            }
+        }
+    }
 }
 
 configurations {
