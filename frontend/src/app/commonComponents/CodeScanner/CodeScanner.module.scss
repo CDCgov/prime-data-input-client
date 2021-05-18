@@ -1,0 +1,44 @@
+.container {
+  padding: 5px;
+  display: flex;
+  flex-direction: row;
+  align-items: center;
+  justify-content: center;
+
+  video {
+    object-fit: cover;
+    border: 1px solid #ccc;
+    width: 100%;
+    max-width: 360px;
+  }
+
+  button {
+    position: absolute;
+    right: 1rem;
+    top: 1rem;
+    cursor: pointer;
+    z-index: 500;
+  }
+
+  .wrapper {
+    position: relative;
+  }
+}
+
+.buttonGroup {
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+  flex-direction: row;
+}
+
+@media only screen and (max-width: 600px) {
+  .container {
+    display: flex;
+    flex-direction: column;
+
+    button {
+      width: auto;
+    }
+  }
+}

@@ -1,4 +1,4 @@
-import React, { useState } from "react";
+import React, { useCallback, useState } from "react";
 import classnames from "classnames";
 import moment from "moment";
 
@@ -13,6 +13,7 @@ import Button from "../../commonComponents/Button/Button";
 import FormGroup from "../../commonComponents/FormGroup";
 import RequiredMessage from "../../commonComponents/RequiredMessage";
 import { COVID_RESULTS } from "../../constants";
+import { CodeScannerContainer } from "../../commonComponents/CodeScanner/CodeScannerContainer";
 
 import "./AoEForm.scss";
 import SymptomInputs from "./SymptomInputs";
@@ -121,6 +122,8 @@ const AoEForm: React.FC<Props> = ({
     patient.testResultDelivery
   );
 
+  const [linkedTestId, setLinkedTestId] = useState<string | null>(null);
+
   const patientIsOver18 = moment().diff(patient.birthDate, "years") >= 18;
 
   // form validation
@@ -213,6 +216,10 @@ const AoEForm: React.FC<Props> = ({
       e.preventDefault();
     }
   };
+  const handleTestLinking = useCallback((testId: string) => {
+    console.log("[TEST ID LINKED]", testId);
+    setLinkedTestId(testId);
+  }, []);
 
   const buttonGroup = (
     <div
@@ -283,6 +290,27 @@ const AoEForm: React.FC<Props> = ({
               lastTest={lastTest}
             />
           </div>
+        </FormGroup>
+        <FormGroup title="Add test">
+          {!linkedTestId && (
+            <CodeScannerContainer
+              onChange={(testId: string) => {
+                handleTestLinking(testId);
+              }}
+            />
+          )}
+
+          {linkedTestId && (
+            <React.Fragment>
+              <div className="usa-alert usa-alert--success usa-alert--slim">
+                <div className="usa-alert__body">
+                  <p className="usa-alert__text">
+                    Test kit linked successfully
+                  </p>
+                </div>
+              </div>
+            </React.Fragment>
+          )}
         </FormGroup>
 
         {patient.gender?.toLowerCase() !== "male" && (
