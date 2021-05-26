@@ -15,5 +15,6 @@ simple-report:
       - https://simple-report-api-dev.azurewebsites.net
       - https://simple-report-dev.azureedge.net
       - https://dev.simplereport.gov
+      - https://20.62.136.248
 twilio:
   enabled: true
