@@ -19,11 +19,15 @@ runs:
     - name: Install dependencies
       working-directory: ./frontend
       shell: bash
-      run: yarn install
+      run: |
+        echo "::group::Install dependencies (hopefully cached)"
+        yarn install
+        echo "::endgroup::"
     - name: Set build variables
       shell: bash
       working-directory: ./frontend
       run: |
+          echo "::group::Set build variables"
           az config set extension.use_dynamic_install=yes_without_prompt > /dev/null 2>&1
           INSIGHTS_KEY=$(
             az monitor app-insights component show \
@@ -37,26 +41,34 @@ runs:
           if [[ "true" == "${{ inputs.is-training-site }}" ]]
             then echo "REACT_APP_IS_TRAINING_SITE=true" >> .env.production.local
           fi
+          echo "::endgroup::"
     - name: Build deployable application
       shell: bash
       working-directory: ./frontend
       env:
         REACT_APP_SMARTY_STREETS_KEY: ${{ inputs.smarty-streets-key }}
         DEPLOY_ENV: ${{ inputs.deploy-env }}
-      run: yarn run build
+      run: |
+        echo "::group::Build application"
+        yarn run build
+        echo "::endgroup::"
     - name: Deploy frontend app
       shell: bash
       working-directory: ./frontend
       run: |
+        echo "::group::Deploy frontend app"
         az storage blob upload-batch -s build/ -d '$web' \
           --account-name simplereport${{ inputs.deploy-env }}app \
           --destination-path '/app'
+        echo "::endgroup::"
     - name: Purge CDN
       shell: bash
       working-directory: ./frontend
       run: |
+        echo "::group::Purge CDN"
         az cdn endpoint purge \
           --resource-group prime-simple-report-${{ inputs.deploy-env }} \
           --profile-name simple-report-${{ inputs.deploy-env }} \
           --name simple-report-${{ inputs.deploy-env }} \
           --content-paths "/app/*" --no-wait
+        echo "::endgroup::"
