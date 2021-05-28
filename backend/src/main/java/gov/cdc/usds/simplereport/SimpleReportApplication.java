@@ -48,4 +48,13 @@ public class SimpleReportApplication {
   public CommandLineRunner scheduleUploads(DataHubConfig config, ScheduledTasksService scheduler) {
     return args -> scheduler.scheduleUploads(config);
   }
+
+  @Bean
+  @Profile("crash-test-dummy")
+  public CommandLineRunner crashMe() {
+    return args -> {
+      Thread.sleep(2000);
+      throw new RuntimeException("This was a mistake.");
+    };
+  }
 }

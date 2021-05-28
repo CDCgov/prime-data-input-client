@@ -1,5 +1,5 @@
 spring:
-  profiles.include: okta-test, server-debug
+  profiles.include: okta-test, server-debug, crash-test-dummy
 simple-report:
   patient-link-url: https://test.simplereport.gov/app/pxp?plid=
   sendgrid:
