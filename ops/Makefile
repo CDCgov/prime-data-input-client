@@ -51,3 +51,11 @@ check-%-commit: .valid-env-%
 check-%-release: .valid-env-%
 	@echo Checking that $(RELEASE_TAG) is the current release on $*
 	@[[ "$(RELEASE_TAG)"  == "`curl --silent --fail --max-time 1 https://$(API_NAME).azurewebsites.net/actuator/info | jq -r .deploy.tag`" ]]
+
+check-%-slot-readiness: .valid-env-%
+	@echo Checking the readiness probe for $*/$(SOURCE_SLOT)
+	@curl -sf -m1 https://$(API_NAME)-$(SOURCE_SLOT).azurewebsites.net/actuator/health/readiness > /dev/null
+
+check-%-readiness: .valid-env-%
+	@echo Checking the readiness probe for $*
+	@curl -sf -m1 https://$(API_NAME).azurewebsites.net/actuator/health/readiness > /dev/null
