@@ -76,8 +76,9 @@
     "eject": "react-scripts eject",
     "compile-scss": "node-sass --include-path ./src/scss --include-path ./node_modules/uswds/dist/scss --output-style compressed -o ./src/styles/ ./src/scss/App.scss",
     "watch-css": "yarn compile-scss && node-sass --include-path ./src/scss --include-path ./node_modules/uswds/dist/scss -o src/styles/ --watch --recursive src/scss/App.scss",
-    "storybook": "yarn watch-css & start-storybook -p 6006 -s public",
-    "build-storybook": "yarn compile-scss && build-storybook -s public"
+    "create-storybook-public": "rm -rf ./strybook_public && cp -R ./public ./storybook_public && cp mockServiceWorker.js ./storybook_public",
+    "storybook": "yarn create-storybook-public && yarn watch-css & start-storybook -p 6006 -s storybook_public",
+    "build-storybook": "yarn create-storybook-public && yarn compile-scss && build-storybook -s storybook_public"
   },
   "prettier": {
     "singleQuote": false
@@ -166,6 +167,8 @@
     "faker": "^5.5.3",
     "geckodriver": "^1.22.3",
     "mockdate": "^3.0.5",
+    "msw": "^0.29.0",
+    "msw-storybook-addon": "^1.1.0",
     "nightwatch": "^1.5.1",
     "node-sass": "^4.14.1",
     "npm-run-all": "^4.1.5",
@@ -179,9 +182,12 @@
   "resolutions": {
     "@storybook/react/babel-loader": "8.1.0"
   },
+  "msw": {
+    "workerDirectory": "/storybook_public"
+  },
   "jest": {
     "moduleNameMapper": {
       "\\.(css|less|sass|scss)$": "<rootDir>/__mocks__/styleMock.js"
     }
-}
+  }
 }

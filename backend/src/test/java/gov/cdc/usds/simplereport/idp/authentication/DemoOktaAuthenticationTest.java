@@ -5,6 +5,7 @@ import static org.junit.jupiter.api.Assertions.assertThrows;
 
 import gov.cdc.usds.simplereport.api.model.errors.InvalidActivationLinkException;
 import gov.cdc.usds.simplereport.api.model.errors.OktaAuthenticationFailureException;
+import gov.cdc.usds.simplereport.idp.authentication.DemoOktaAuthentication.DemoAuthUser;
 import org.junit.jupiter.api.BeforeEach;
 import org.junit.jupiter.api.Test;
 
@@ -13,6 +14,8 @@ class DemoOktaAuthenticationTest {
   private DemoOktaAuthentication _auth = new DemoOktaAuthentication();
 
   private static final String VALID_ACTIVATION_TOKEN = "valid_activation_token";
+  private static final String VALID_PHONE_NUMBER = "555-867-5309";
+  private static final String STRIPPED_PHONE_NUMBER = "5558675309";
 
   @BeforeEach
   public void setup() {
@@ -126,5 +129,110 @@ class DemoOktaAuthenticationTest {
               _auth.setRecoveryQuestion(userId, "Who was your third grade teacher?", " ");
             });
     assertThat(exception.getMessage()).isEqualTo("Recovery answer cannot be empty.");
+  }
+
+  @Test
+  void enrollSmsMfaSuccessful() throws Exception {
+    String userId = _auth.activateUser(VALID_ACTIVATION_TOKEN);
+    _auth.enrollSmsMfa(userId, VALID_PHONE_NUMBER);
+    DemoAuthUser user = _auth.getUser(userId);
+
+    assertThat(user.getMfa().getFactorProfile()).isEqualTo(STRIPPED_PHONE_NUMBER);
+    assertThat(user.getMfa().getFactorType()).isEqualTo("smsFactor");
+    assertThat(user.getMfa().getFactorId()).isEqualTo("smsFactor " + STRIPPED_PHONE_NUMBER);
+  }
+
+  @Test
+  void enrollSmsMfa_failsWithoutValidActivation() {
+    Exception exception =
+        assertThrows(
+            OktaAuthenticationFailureException.class,
+            () -> {
+              _auth.enrollSmsMfa("fakeUserId", VALID_PHONE_NUMBER);
+            });
+
+    assertThat(exception.getMessage()).isEqualTo("User id not recognized.");
+  }
+
+  @Test
+  void enrollSmsMfa_failsForInvalidPhoneNumber() {
+    String userId = _auth.activateUser(VALID_ACTIVATION_TOKEN);
+    Exception exception =
+        assertThrows(
+            OktaAuthenticationFailureException.class,
+            () -> {
+              _auth.enrollSmsMfa(userId, "555");
+            });
+    assertThat(exception.getMessage()).isEqualTo("Phone number is invalid.");
+  }
+
+  @Test
+  void enrollVoiceCallMfaSuccessful() throws Exception {
+    String userId = _auth.activateUser(VALID_ACTIVATION_TOKEN);
+    _auth.enrollVoiceCallMfa(userId, VALID_PHONE_NUMBER);
+    DemoAuthUser user = _auth.getUser(userId);
+
+    assertThat(user.getMfa().getFactorProfile()).isEqualTo(STRIPPED_PHONE_NUMBER);
+    assertThat(user.getMfa().getFactorType()).isEqualTo("callFactor");
+    assertThat(user.getMfa().getFactorId()).isEqualTo("callFactor " + STRIPPED_PHONE_NUMBER);
+  }
+
+  @Test
+  void enrollVoiceCallMfa_failsWithoutValidActivation() {
+    Exception exception =
+        assertThrows(
+            OktaAuthenticationFailureException.class,
+            () -> {
+              _auth.enrollVoiceCallMfa("fakeUserId", VALID_PHONE_NUMBER);
+            });
+
+    assertThat(exception.getMessage()).isEqualTo("User id not recognized.");
+  }
+
+  @Test
+  void enrollVoiceCallMfa_failsForInvalidPhoneNumber() {
+    String userId = _auth.activateUser(VALID_ACTIVATION_TOKEN);
+    Exception exception =
+        assertThrows(
+            OktaAuthenticationFailureException.class,
+            () -> {
+              _auth.enrollVoiceCallMfa(userId, "555");
+            });
+    assertThat(exception.getMessage()).isEqualTo("Phone number is invalid.");
+  }
+
+  @Test
+  void enrollEmailMfaSuccessful() throws OktaAuthenticationFailureException {
+    String userId = _auth.activateUser(VALID_ACTIVATION_TOKEN);
+    _auth.enrollEmailMfa(userId, "me@example.com");
+    DemoAuthUser user = _auth.getUser(userId);
+
+    assertThat(user.getMfa().getFactorProfile()).isEqualTo("me@example.com");
+    assertThat(user.getMfa().getFactorType()).isEqualTo("emailFactor");
+    assertThat(user.getMfa().getFactorId()).isEqualTo("emailFactor me@example.com");
+  }
+
+  @Test
+  void enrollEmailMfa_failsWithoutValidActivation() {
+    Exception exception =
+        assertThrows(
+            OktaAuthenticationFailureException.class,
+            () -> {
+              _auth.enrollEmailMfa("fakeUserId", "me@example.com");
+            });
+
+    assertThat(exception.getMessage()).isEqualTo("User id not recognized.");
+  }
+
+  @Test
+  void enrollEmailMfa_failsForInvalidEmail() {
+    String userId = _auth.activateUser(VALID_ACTIVATION_TOKEN);
+    Exception exception =
+        assertThrows(
+            OktaAuthenticationFailureException.class,
+            () -> {
+              _auth.enrollEmailMfa(userId, "meexample.com");
+            });
+    assertThat(exception.getMessage()).isEqualTo("Email address is invalid.");
   }
 }

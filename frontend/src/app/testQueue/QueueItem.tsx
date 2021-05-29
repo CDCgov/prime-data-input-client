@@ -168,7 +168,7 @@ if (process.env.NODE_ENV !== "test") {
   Modal.setAppElement("#root");
 }
 
-interface QueueItemProps {
+export interface QueueItemProps {
   internalId: string;
   patient: {
     internalId: string;

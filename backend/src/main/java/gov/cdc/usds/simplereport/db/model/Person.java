@@ -178,6 +178,10 @@ public class Person extends OrganizationScopedEternalEntity implements PersonEnt
     facility = f;
   }
 
+  public PhoneNumber getPrimaryPhone() {
+    return this.primaryPhone;
+  }
+
   public void setPrimaryPhone(PhoneNumber phoneNumber) {
     this.primaryPhone = phoneNumber;
   }
@@ -215,10 +219,7 @@ public class Person extends OrganizationScopedEternalEntity implements PersonEnt
   }
 
   public String getTelephone() {
-    if (primaryPhone == null) {
-      return "";
-    }
-    return primaryPhone.getNumber();
+    return this.getPrimaryPhone().getNumber();
   }
 
   public List<PhoneNumber> getPhoneNumbers() {

@@ -5,13 +5,9 @@ import static org.junit.jupiter.api.Assertions.assertNotEquals;
 import static org.junit.jupiter.api.Assertions.assertNotNull;
 import static org.junit.jupiter.api.Assertions.assertThrows;
 
-import gov.cdc.usds.simplereport.db.model.DeviceType;
-import gov.cdc.usds.simplereport.db.model.Facility;
-import gov.cdc.usds.simplereport.db.model.Organization;
-import gov.cdc.usds.simplereport.db.model.Person;
-import gov.cdc.usds.simplereport.db.model.TestEvent;
-import gov.cdc.usds.simplereport.db.model.TestOrder;
+import gov.cdc.usds.simplereport.db.model.*;
 import gov.cdc.usds.simplereport.db.model.auxiliary.PersonRole;
+import gov.cdc.usds.simplereport.db.model.auxiliary.PhoneType;
 import gov.cdc.usds.simplereport.db.model.auxiliary.TestResult;
 import gov.cdc.usds.simplereport.test_util.TestDataFactory;
 import java.time.LocalDate;
@@ -26,6 +22,7 @@ class TestOrderRepositoryTest extends BaseRepositoryTest {
 
   @Autowired private TestOrderRepository _repo;
   @Autowired private PersonRepository _personRepo;
+  @Autowired private PhoneNumberRepository _phoneRepo;
   @Autowired private OrganizationRepository _orgRepo;
   @Autowired private TestEventRepository _events;
   @Autowired private TestDataFactory _dataFactory;
@@ -55,6 +52,11 @@ class TestOrderRepositoryTest extends BaseRepositoryTest {
                 "",
                 false,
                 false));
+    PhoneNumber pn = new PhoneNumber(PhoneType.LANDLINE, "5555555555");
+    pn.setPerson(hoya);
+    _phoneRepo.save(pn);
+    hoya.setPrimaryPhone(pn);
+    hoya = _personRepo.save(hoya);
     TestOrder order = _repo.save(new TestOrder(hoya, site));
     List<TestOrder> queue = _repo.fetchQueue(gwu, otherSite);
     assertEquals(0, queue.size());
@@ -92,6 +94,11 @@ class TestOrderRepositoryTest extends BaseRepositoryTest {
                 "",
                 false,
                 false));
+    PhoneNumber pn = new PhoneNumber(PhoneType.LANDLINE, "5555555555");
+    pn.setPerson(hoya);
+    _phoneRepo.save(pn);
+    hoya.setPrimaryPhone(pn);
+    hoya = _personRepo.save(hoya);
     Facility site = _dataFactory.createValidFacility(gtown);
     TestOrder order = _repo.save(new TestOrder(hoya, site));
     assertNotNull(order);

@@ -5,6 +5,7 @@ import static org.junit.jupiter.api.Assertions.assertEquals;
 import static org.junit.jupiter.api.Assertions.assertNotNull;
 import static org.junit.jupiter.api.Assertions.assertNull;
 
+import gov.cdc.usds.simplereport.db.model.auxiliary.PhoneType;
 import gov.cdc.usds.simplereport.db.model.auxiliary.StreetAddress;
 import java.io.IOException;
 import java.time.LocalDate;
@@ -123,6 +124,8 @@ class PersonSerializationTest {
             "Male-ish",
             true,
             false);
+    PhoneNumber pn = new PhoneNumber(PhoneType.LANDLINE, "5555555555");
+    p.setPrimaryPhone(pn);
     return p;
   }
 

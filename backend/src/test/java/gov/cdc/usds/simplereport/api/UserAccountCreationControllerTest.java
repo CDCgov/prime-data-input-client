@@ -46,6 +46,10 @@ class UserAccountCreationControllerTest {
   private static final String VALID_RECOVERY_QUESTION_REQUEST =
       "{\"question\":\"Who was your third grade teacher?\", \"answer\" : \"Jane Doe\"}";
 
+  private static final String VALID_ENROLL_PHONE_MFA_REQUEST = "{\"userInput\":\"555-867-5309\"}";
+
+  private static final String VALID_ENROLL_EMAIL_MFA_REQUEST = "{\"userInput\":\"me@example.com\"}";
+
   @BeforeEach
   public void setup() throws Exception {
     _oktaAuth.reset();
@@ -164,5 +168,233 @@ class UserAccountCreationControllerTest {
     assertThat(setRecoveryQuestionResponse.getAttribute("userId"))
         .isEqualTo("userId " + "validActivationToken");
     assertEquals(setPasswordResponse, setRecoveryQuestionResponse);
+  }
+
+  @Test
+  void enrollSmsMfaIsOk() throws Exception {
+    MockHttpSession session = new MockHttpSession();
+
+    MockHttpServletRequestBuilder setPasswordBuilder =
+        post(ResourceLinks.USER_SET_PASSWORD)
+            .contentType(MediaType.APPLICATION_JSON_VALUE)
+            .accept(MediaType.APPLICATION_JSON)
+            .characterEncoding("UTF-8")
+            .header("X-Forwarded-For", "1.1.1.1")
+            .header("User-Agent", "Chrome")
+            .content(VALID_PASSWORD_REQUEST)
+            .session(session);
+
+    MockHttpServletRequestBuilder enrollSmsMfaBuilder =
+        post(ResourceLinks.USER_ENROLL_SMS_MFA)
+            .contentType(MediaType.APPLICATION_JSON_VALUE)
+            .accept(MediaType.APPLICATION_JSON)
+            .characterEncoding("UTF-8")
+            .content(VALID_ENROLL_PHONE_MFA_REQUEST)
+            .session(session);
+
+    HttpSession setPasswordResponse =
+        this._mockMvc
+            .perform(setPasswordBuilder)
+            .andExpect(status().isOk())
+            .andReturn()
+            .getRequest()
+            .getSession(false);
+
+    HttpSession enrollSmsMfaResponse =
+        this._mockMvc
+            .perform(enrollSmsMfaBuilder)
+            .andExpect(status().isOk())
+            .andReturn()
+            .getRequest()
+            .getSession(false);
+
+    assertThat(setPasswordResponse.getAttribute("userId"))
+        .isEqualTo(enrollSmsMfaResponse.getAttribute("userId"));
+    assertThat(enrollSmsMfaResponse.getAttribute("factorId")).isNotNull();
+  }
+
+  @Test
+  void cannotEnrollSmsMfa_withoutActivatedUser() throws Exception {
+    MockHttpSession session = new MockHttpSession();
+
+    MockHttpServletRequestBuilder enrollSmsMfaBuilder =
+        post(ResourceLinks.USER_ENROLL_SMS_MFA)
+            .contentType(MediaType.APPLICATION_JSON_VALUE)
+            .accept(MediaType.APPLICATION_JSON)
+            .characterEncoding("UTF-8")
+            .content(VALID_ENROLL_PHONE_MFA_REQUEST)
+            .session(session);
+
+    this._mockMvc.perform(enrollSmsMfaBuilder).andExpect(status().is4xxClientError());
+  }
+
+  @Test
+  void enrollVoiceCallMfaIsOk() throws Exception {
+    MockHttpSession session = new MockHttpSession();
+
+    MockHttpServletRequestBuilder activateUserBuilder =
+        post(ResourceLinks.USER_SET_PASSWORD)
+            .contentType(MediaType.APPLICATION_JSON_VALUE)
+            .accept(MediaType.APPLICATION_JSON)
+            .characterEncoding("UTF-8")
+            .header("X-Forwarded-For", "1.1.1.1")
+            .header("User-Agent", "Chrome")
+            .content(VALID_PASSWORD_REQUEST)
+            .session(session);
+
+    MockHttpServletRequestBuilder enrollVoiceCallMfaBuilder =
+        post(ResourceLinks.USER_ENROLL_VOICE_CALL_MFA)
+            .contentType(MediaType.APPLICATION_JSON_VALUE)
+            .accept(MediaType.APPLICATION_JSON)
+            .characterEncoding("UTF-8")
+            .content(VALID_ENROLL_PHONE_MFA_REQUEST)
+            .session(session);
+
+    HttpSession setPasswordResponse =
+        this._mockMvc
+            .perform(activateUserBuilder)
+            .andExpect(status().isOk())
+            .andReturn()
+            .getRequest()
+            .getSession(false);
+
+    HttpSession enrollVoiceCallMfaResponse =
+        this._mockMvc
+            .perform(enrollVoiceCallMfaBuilder)
+            .andExpect(status().isOk())
+            .andReturn()
+            .getRequest()
+            .getSession(false);
+
+    assertThat(setPasswordResponse.getAttribute("userId"))
+        .isEqualTo(enrollVoiceCallMfaResponse.getAttribute("userId"));
+    assertThat(enrollVoiceCallMfaResponse.getAttribute("factorId")).isNotNull();
+  }
+
+  @Test
+  void cannotEnrollVoiceCallMfa_withoutActivatedUser() throws Exception {
+    MockHttpSession session = new MockHttpSession();
+
+    MockHttpServletRequestBuilder enrollSmsMfaBuilder =
+        post(ResourceLinks.USER_ENROLL_VOICE_CALL_MFA)
+            .contentType(MediaType.APPLICATION_JSON_VALUE)
+            .accept(MediaType.APPLICATION_JSON)
+            .characterEncoding("UTF-8")
+            .content(VALID_ENROLL_PHONE_MFA_REQUEST)
+            .session(session);
+
+    this._mockMvc.perform(enrollSmsMfaBuilder).andExpect(status().is4xxClientError());
+  }
+
+  @Test
+  void cannotEnrollVoiceCallMfa_withoutValidPhoneNumber() throws Exception {
+    MockHttpSession session = new MockHttpSession();
+
+    MockHttpServletRequestBuilder activateUserBuilder =
+        post(ResourceLinks.USER_SET_PASSWORD)
+            .contentType(MediaType.APPLICATION_JSON_VALUE)
+            .accept(MediaType.APPLICATION_JSON)
+            .characterEncoding("UTF-8")
+            .header("X-Forwarded-For", "1.1.1.1")
+            .header("User-Agent", "Chrome")
+            .content(VALID_PASSWORD_REQUEST)
+            .session(session);
+
+    MockHttpServletRequestBuilder enrollVoiceCallMfaBuilder =
+        post(ResourceLinks.USER_ENROLL_VOICE_CALL_MFA)
+            .contentType(MediaType.APPLICATION_JSON_VALUE)
+            .accept(MediaType.APPLICATION_JSON)
+            .characterEncoding("UTF-8")
+            .content("{\"userInput\":\"555\"}")
+            .session(session);
+
+    this._mockMvc.perform(activateUserBuilder).andExpect(status().isOk());
+
+    this._mockMvc.perform(enrollVoiceCallMfaBuilder).andExpect(status().is4xxClientError());
+  }
+
+  @Test
+  void enrollEmailMfa_isOk() throws Exception {
+    MockHttpSession session = new MockHttpSession();
+
+    MockHttpServletRequestBuilder activateUserBuilder =
+        post(ResourceLinks.USER_SET_PASSWORD)
+            .contentType(MediaType.APPLICATION_JSON_VALUE)
+            .accept(MediaType.APPLICATION_JSON)
+            .characterEncoding("UTF-8")
+            .header("X-Forwarded-For", "1.1.1.1")
+            .header("User-Agent", "Chrome")
+            .content(VALID_PASSWORD_REQUEST)
+            .session(session);
+
+    MockHttpServletRequestBuilder enrollEmailMfaBuilder =
+        post(ResourceLinks.USER_ENROLL_EMAIL_MFA)
+            .contentType(MediaType.APPLICATION_JSON_VALUE)
+            .accept(MediaType.APPLICATION_JSON)
+            .characterEncoding("UTF-8")
+            .content(VALID_ENROLL_EMAIL_MFA_REQUEST)
+            .session(session);
+
+    HttpSession setPasswordResponse =
+        this._mockMvc
+            .perform(activateUserBuilder)
+            .andExpect(status().isOk())
+            .andReturn()
+            .getRequest()
+            .getSession(false);
+
+    HttpSession enrollEmailMfaResponse =
+        this._mockMvc
+            .perform(enrollEmailMfaBuilder)
+            .andExpect(status().isOk())
+            .andReturn()
+            .getRequest()
+            .getSession(false);
+
+    assertThat(setPasswordResponse.getAttribute("userId"))
+        .isEqualTo(enrollEmailMfaResponse.getAttribute("userId"));
+    assertThat(enrollEmailMfaResponse.getAttribute("factorId")).isNotNull();
+  }
+
+  @Test
+  void cannotEnrollEmailMfa_withoutActivatedUser() throws Exception {
+    MockHttpSession session = new MockHttpSession();
+
+    MockHttpServletRequestBuilder enrollEmailMfaBuilder =
+        post(ResourceLinks.USER_ENROLL_EMAIL_MFA)
+            .contentType(MediaType.APPLICATION_JSON_VALUE)
+            .accept(MediaType.APPLICATION_JSON)
+            .characterEncoding("UTF-8")
+            .content(VALID_ENROLL_EMAIL_MFA_REQUEST)
+            .session(session);
+
+    this._mockMvc.perform(enrollEmailMfaBuilder).andExpect(status().is4xxClientError());
+  }
+
+  @Test
+  void cannotEnrollEmailMfa_withoutValidEmail() throws Exception {
+    MockHttpSession session = new MockHttpSession();
+
+    MockHttpServletRequestBuilder activateUserBuilder =
+        post(ResourceLinks.USER_SET_PASSWORD)
+            .contentType(MediaType.APPLICATION_JSON_VALUE)
+            .accept(MediaType.APPLICATION_JSON)
+            .characterEncoding("UTF-8")
+            .header("X-Forwarded-For", "1.1.1.1")
+            .header("User-Agent", "Chrome")
+            .content(VALID_PASSWORD_REQUEST)
+            .session(session);
+
+    MockHttpServletRequestBuilder enrollEmailMfaBuilder =
+        post(ResourceLinks.USER_ENROLL_EMAIL_MFA)
+            .contentType(MediaType.APPLICATION_JSON_VALUE)
+            .accept(MediaType.APPLICATION_JSON)
+            .characterEncoding("UTF-8")
+            .content("{\"userInput\":\"bademail.com\"}")
+            .session(session);
+
+    this._mockMvc.perform(activateUserBuilder).andExpect(status().isOk());
+
+    this._mockMvc.perform(enrollEmailMfaBuilder).andExpect(status().is4xxClientError());
   }
 }

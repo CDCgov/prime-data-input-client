@@ -10,6 +10,7 @@ import gov.cdc.usds.simplereport.api.model.useraccountcreation.UserAccountCreati
 import gov.cdc.usds.simplereport.idp.authentication.OktaAuthentication;
 import javax.annotation.PostConstruct;
 import javax.servlet.http.HttpServletRequest;
+import javax.servlet.http.HttpSession;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 import org.springframework.beans.factory.annotation.Autowired;
@@ -26,6 +27,7 @@ public class UserAccountCreationController {
   private static final Logger LOG = LoggerFactory.getLogger(UserAccountCreationController.class);
 
   private static final String USER_ID_KEY = "userId";
+  private static final String FACTOR_ID = "factorId";
 
   @Autowired private OktaAuthentication _oktaAuth;
 
@@ -54,6 +56,9 @@ public class UserAccountCreationController {
             requestBody.getActivationToken(),
             request.getHeader("X-Forwarded-For"),
             request.getHeader("User-Agent"));
+    if (userId.isEmpty()) {
+      throw new OktaAuthenticationFailureException("Returned user id is empty.");
+    }
     request.getSession().setAttribute(USER_ID_KEY, userId);
     _oktaAuth.setPassword(userId, requestBody.getPassword().toCharArray());
   }
@@ -68,11 +73,10 @@ public class UserAccountCreationController {
    */
   @PostMapping("/set-recovery-question")
   public void setRecoveryQuestions(
-      @RequestBody SetRecoveryQuestionRequest requestBody, HttpServletRequest request) {
-    _oktaAuth.setRecoveryQuestion(
-        request.getSession().getAttribute(USER_ID_KEY).toString(),
-        requestBody.getQuestion(),
-        requestBody.getAnswer());
+      @RequestBody SetRecoveryQuestionRequest requestBody, HttpServletRequest request)
+      throws OktaAuthenticationFailureException {
+    String userId = getUserId(request.getSession());
+    _oktaAuth.setRecoveryQuestion(userId, requestBody.getQuestion(), requestBody.getAnswer());
   }
 
   /**
@@ -83,8 +87,11 @@ public class UserAccountCreationController {
    * @throws OktaAuthenticationFailureException if the provided phone number is invalid.
    */
   @PostMapping("/enroll-sms-mfa")
-  public void enrollSmsMfa(@RequestBody EnrollMfaRequest requestBody, HttpServletRequest request) {
-    // WIP: doesn't interact with Okta yet.
+  public void enrollSmsMfa(@RequestBody EnrollMfaRequest requestBody, HttpServletRequest request)
+      throws OktaAuthenticationFailureException {
+    String userId = getUserId(request.getSession());
+    String factorId = _oktaAuth.enrollSmsMfa(userId, requestBody.getUserInput());
+    request.getSession().setAttribute(FACTOR_ID, factorId);
   }
 
   /**
@@ -96,8 +103,11 @@ public class UserAccountCreationController {
    */
   @PostMapping("/enroll-voice-call-mfa")
   public void enrollVoiceCallMfa(
-      @RequestBody EnrollMfaRequest requestBody, HttpServletRequest request) {
-    // WIP: doesn't interact with Okta yet.
+      @RequestBody EnrollMfaRequest requestBody, HttpServletRequest request)
+      throws OktaAuthenticationFailureException {
+    String userId = getUserId(request.getSession());
+    String factorId = _oktaAuth.enrollVoiceCallMfa(userId, requestBody.getUserInput());
+    request.getSession().setAttribute(FACTOR_ID, factorId);
   }
 
   /**
@@ -108,9 +118,11 @@ public class UserAccountCreationController {
    * @throws OktaAuthenticationFailureException if the provided email address is invalid.
    */
   @PostMapping("/enroll-email-mfa")
-  public void enrollEmailMfa(
-      @RequestBody EnrollMfaRequest requestBody, HttpServletRequest request) {
-    // WIP: doesn't interact with Okta yet.
+  public void enrollEmailMfa(@RequestBody EnrollMfaRequest requestBody, HttpServletRequest request)
+      throws OktaAuthenticationFailureException {
+    String userId = getUserId(request.getSession());
+    String factorId = _oktaAuth.enrollEmailMfa(userId, requestBody.getUserInput());
+    request.getSession().setAttribute(FACTOR_ID, factorId);
   }
 
   /**
@@ -149,5 +161,15 @@ public class UserAccountCreationController {
   @PostMapping("/resend-activation-passcode")
   public void resendActivationPasscode(HttpServletRequest request) {
     // WIP: doesn't interact with Okta yet.
+  }
+
+  private String getUserId(HttpSession session) throws OktaAuthenticationFailureException {
+    Object userId = session.getAttribute(USER_ID_KEY);
+    if (userId != null) {
+      return userId.toString();
+    } else {
+      throw new OktaAuthenticationFailureException(
+          "User id not found; user could not be authenticated.");
+    }
   }
 }

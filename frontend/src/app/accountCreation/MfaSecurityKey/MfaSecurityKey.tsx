@@ -25,7 +25,7 @@ export const MfaSecurityKey = () => {
           </li>
         </ol>
         <div className="display-flex flex-column flex-align-center">
-          <img className="square-5" src={iconLoader} alt="" />
+          <img className="square-5 chromatic-ignore" src={iconLoader} alt="" />
         </div>
         {/* <Button className="margin-top-3" label={"Continue"} type={"submit"} /> */}
       </Card>
