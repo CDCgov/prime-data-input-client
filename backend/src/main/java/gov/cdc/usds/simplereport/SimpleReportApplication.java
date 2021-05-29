@@ -53,7 +53,7 @@ public class SimpleReportApplication {
   @Profile("crash-test-dummy")
   public CommandLineRunner crashMe() {
     return args -> {
-      Thread.sleep(2000);
+      Thread.sleep(10000);
       throw new RuntimeException("This was a mistake.");
     };
   }
