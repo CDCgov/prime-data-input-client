@@ -49,9 +49,9 @@ jobs:
         run: make deploy-${{ env.DEPLOY_ENV }}-api
       - name: Wait for staging deploy to complete
         timeout-minutes: 10
-        run: make wait-for-${{ env.DEPLOY_ENV }}
+        run: make wait-for-${{ env.DEPLOY_ENV }} check-${{ env.DEPLOY_ENV }}-slot-readiness
       - name: Promote staging to production
-        run: make promote-${{ env.DEPLOY_ENV }}
+        run: make promote-${{ env.DEPLOY_ENV }} check-${{ env.DEPLOY_ENV }}-readiness
   deploy-frontend:
     runs-on: ubuntu-latest
     steps:
