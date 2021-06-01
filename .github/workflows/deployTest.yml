@@ -56,6 +56,8 @@ jobs:
       - name: Promote staging to production
         run: make promote-${{ env.DEPLOY_ENV }}
       - name: Check for production app readiness
+        env:
+          CURL_TIMEOUT: 5 # 1 second seems to be too tight for the initial launch
         run: make check-${{ env.DEPLOY_ENV }}-readiness
   deploy-frontend:
     runs-on: ubuntu-latest
