@@ -56,7 +56,7 @@ jobs:
       - name: Promote staging to production
         run: make promote-${{ env.DEPLOY_ENV }}
       - name: Check for production app readiness
-        run: make check-for-${{ env.DEPLOY_ENV }}-readiness
+        run: make check-${{ env.DEPLOY_ENV }}-readiness
   deploy-frontend:
     runs-on: ubuntu-latest
     steps:
