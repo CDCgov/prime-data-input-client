@@ -5,12 +5,13 @@ SOURCE_SLOT?=staging
 TARGET_SLOT?=production
 DEPLOYED_COMMIT?=$(shell git show --abbrev=7 -s --pretty=%h)
 RELEASE_TAG?=$(subst refs/tags/,,$(GITHUB_REF))
+CURL_TIMEOUT=1
 
 # Internal DRYing
 API_NAME=simple-report-api-$*
 INFO_ENDPOINT=https://$(API_NAME).azurewebsites.net/actuator/info
 SLOT_INFO_ENDPOINT=https://$(API_NAME)-$(SOURCE_SLOT).azurewebsites.net/actuator/info
-CURL:=curl --silent --fail --max-time 1
+CURL:=curl --silent --fail --max-time $(CURL_TIMEOUT)
 APP_READY=$(CURL) https://$(API_NAME).azurewebsites.net/actuator/health/readiness > /dev/null
 SLOT_READY=$(CURL) https://$(API_NAME)-$(SOURCE_SLOT).azurewebsites.net/actuator/health/readiness > /dev/null
 
@@ -19,6 +20,7 @@ default:
 	@echo "You can use 'make promote-ENV' to promote the $(SOURCE_SLOT) slot of any environment, if you are logged in to azure"
 	@echo "You can also run 'make init-ENV' or 'make deploy-ENV-api' but those may not be as useful locally."
 	@echo "In addition, there are a variety of targets that start with 'check' or 'wait-for', which you should just look at."
+	@echo "Please note in particular that most if not all 'wait' tasks do not have a built-in timeout."
 
 # Internal target: check if we are currently logged in, so we get a friendly error if not
 .be-logged-in:
@@ -57,11 +59,11 @@ wait-for-%-commit: .valid-env-%
 	until  [[ "$(DEPLOYED_COMMIT)"  == "`$(CURL) $(INFO_ENDPOINT) | jq -r .git.commit.id`" ]] ; do sleep 5; done;
 	@echo "Finished waiting at `date`"
 
-wait-for-%-slot-readiness: .valid-env-% # better use an external timeout for this!
+wait-for-%-slot-readiness: .valid-env-% # could use curl's built-in retry/timeout if we wanted to
 	@echo "Waiting for a successful readiness probe in $*/$(SOURCE_SLOT)"
 	until $(SLOT_READY); do sleep 5; done;
 
-wait-for-%-readiness: .valid-env-% # better use an external timeout for this!
+wait-for-%-readiness: .valid-env-% # could use curl's built-in retry/timeout if we wanted to
 	@echo "Waiting for a successful readiness probe in $*"
 	until $(APP_READY); do sleep 5; done;
 
