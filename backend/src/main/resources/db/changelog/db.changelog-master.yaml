@@ -2154,3 +2154,20 @@ databaseChangeLog:
                   replaceIfExists: true
                   fullDefinition: false
                   selectQuery: SELECT internal_id, created_at, updated_at, last_seen, is_deleted FROM ${database.defaultSchemaName}.api_user
+  - changeSet:
+      id: drop-person-phone
+      author: adam@skylight.digital
+      comment: Drop person.telephone, which is now off-row in the phone_number table. See also person.primary_phone_internal_id
+      changes:
+        - dropColumn:
+            tableName: person
+            columns:
+              - column:
+                  name: telephone
+  - changeSet:
+      id: add-patient-reg-link-to-metabase
+      author: adam@skylight.digital
+      comment: Adds permission for the no-PHI user to select from the patient registration link table
+      changes:
+        sql: |
+          GRANT SELECT ON TABLE ${database.defaultSchemaName}.patient_registration_link TO ${noPhiUsername};

@@ -56,18 +56,20 @@ const PriorTestInputs: React.FC<Props> = ({
   );
   const previousTestEntry = (
     <>
-      <Label htmlFor="prior_test_date">Date of most recent test</Label>
-      <span className="usa-hint">mm/dd/yyyy</span>
-      <DatePicker
-        className="maxw-mobile"
-        id="prior_test_date"
-        name="prior_test_date"
-        defaultValue={priorTestDate || undefined}
-        minDate="2020-02-01"
-        maxDate={new Date().toISOString().split("T")[0]}
-        disabled={!lastTestDateKnown}
-        onChange={setPriorTestDate}
-      />
+      <div className="usa-form-group">
+        <Label htmlFor="prior_test_date">Date of most recent test</Label>
+        <span className="usa-hint">mm/dd/yyyy</span>
+        <DatePicker
+          className="maxw-mobile"
+          id="prior_test_date"
+          name="prior_test_date"
+          defaultValue={priorTestDate || undefined}
+          minDate="2020-02-01"
+          maxDate={new Date().toISOString().split("T")[0]}
+          disabled={!lastTestDateKnown}
+          onChange={setPriorTestDate}
+        />
+      </div>
       <Checkboxes
         legend="Date of most recent test unknown?"
         name="mostRecentTestUnknown"

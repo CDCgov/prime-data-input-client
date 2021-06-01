@@ -27,8 +27,8 @@ export const MfaPhone = (props: Props) => {
       <Card logo>
         <h1 className="font-ui-sm margin-top-3">Enter your security code</h1>
         <p className="usa-hint margin-bottom-0 line-height-sans-3">
-          We sent a security code to <b>{props.phoneNumber}</b>. This code will
-          expire in 10 minutes.
+          Enter the security code sent to <b>{props.phoneNumber}</b>. This code
+          will expire in 10 minutes.
         </p>
         <div className="display-flex">
           <TextInput

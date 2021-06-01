@@ -101,10 +101,10 @@ Array [
     </fieldset>
   </div>,
   <div
-    className="border-top border-base-lighter margin-x-neg-205 margin-top-5 padding-top-205 text-right"
+    className="aoe-modal__submit-container border-top border-base-lighter margin-top-5 text-right"
   >
     <button
-      className="usa-button margin-right-205"
+      className="usa-button margin-right-0"
       onClick={[Function]}
       type="button"
     >

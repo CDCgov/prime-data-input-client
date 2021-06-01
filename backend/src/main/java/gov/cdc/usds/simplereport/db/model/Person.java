@@ -219,7 +219,11 @@ public class Person extends OrganizationScopedEternalEntity implements PersonEnt
   }
 
   public String getTelephone() {
-    return this.getPrimaryPhone().getNumber();
+    PhoneNumber pn = this.getPrimaryPhone();
+    if (pn == null) {
+      return "";
+    }
+    return pn.getNumber();
   }
 
   public List<PhoneNumber> getPhoneNumbers() {

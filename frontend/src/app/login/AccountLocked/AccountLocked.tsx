@@ -9,8 +9,7 @@ export const AccountLocked = () => {
           Your account has been locked for 15 minutes
         </h1>
         <p className="line-height-sans-3">
-          If you have a SimpleReport account we’ve sent an email with
-          instructions to reset your password.
+          We’ve sent you an email with instructions to reset your password.
         </p>
       </Card>
       <p className="margin-top-4">

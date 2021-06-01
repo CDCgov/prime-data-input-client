@@ -99,10 +99,10 @@ const SmsModalContents = ({
           </div>
         </div>
       )}
-      <div className="border-top border-base-lighter margin-x-neg-205 margin-top-5 padding-top-205 text-right">
+      <div className="aoe-modal__submit-container border-top border-base-lighter margin-top-5 text-right">
         {!smsSuccess ? (
           <Button
-            className="margin-right-205"
+            className="margin-right-0"
             label="Text link"
             type={"button"}
             onClick={() => sendSms()}
@@ -256,7 +256,7 @@ const AoEModalForm = (props: AoEModalProps) => {
       case "smartphone":
         innerContents = (
           <>
-            <section className="display-flex flex-justify-center margin-top-4 padding-top-5 border-top border-base-lighter">
+            <section className="aoe-modal__qr-container display-flex flex-justify-center margin-top-4 padding-top-5 border-top border-base-lighter">
               <div className="text-center">
                 <p className="font-body-lg margin-y-0">
                   Point your camera at the QR code <br />
@@ -271,9 +271,9 @@ const AoEModalForm = (props: AoEModalProps) => {
                 </div>
               </div>
             </section>
-            <div className="border-top border-base-lighter margin-x-neg-205 margin-top-5 padding-top-205 text-right">
+            <div className="aoe-modal__submit-container border-top border-base-lighter margin-top-5 text-right">
               <Button
-                className="margin-right-205"
+                className="margin-right-0"
                 label={saveButtonText}
                 type={"button"}
                 onClick={() => continueModal()}

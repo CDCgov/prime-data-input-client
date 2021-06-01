@@ -392,82 +392,86 @@ Array [
       </fieldset>
     </div>
   </div>,
-  <label
-    className="usa-label"
-    data-testid="label"
-    htmlFor="meeting-time"
-  >
-    Date of symptom onset
-  </label>,
-  <span
-    className="usa-hint"
-  >
-    mm/dd/yyyy
-  </span>,
   <div
-    className="usa-date-picker usa-date-picker--initialized maxw-mobile"
-    data-testid="date-picker"
-    onBlur={[Function]}
-    onKeyDown={[Function]}
+    className="usa-form-group"
   >
-    <input
-      aria-hidden={true}
-      className="usa-input usa-sr-only usa-date-picker__internal-input"
-      data-testid="date-picker-internal-input"
-      disabled={false}
-      name="symptom_onset"
-      readOnly={true}
-      required={false}
-      tabIndex={-1}
-      type="text"
-      value=""
-    />
+    <label
+      className="usa-label"
+      data-testid="label"
+      htmlFor="meeting-time"
+    >
+      Date of symptom onset
+    </label>
+    <span
+      className="usa-hint"
+    >
+      mm/dd/yyyy
+    </span>
     <div
-      className="usa-date-picker__wrapper"
-      tabIndex={-1}
+      className="usa-date-picker usa-date-picker--initialized maxw-mobile"
+      data-testid="date-picker"
+      onBlur={[Function]}
+      onKeyDown={[Function]}
     >
       <input
-        className="usa-input usa-date-picker__external-input"
-        data-testid="date-picker-external-input"
-        id="symptom_onset"
-        onBlur={[Function]}
-        onFocus={[Function]}
-        onInput={[Function]}
+        aria-hidden={true}
+        className="usa-input usa-sr-only usa-date-picker__internal-input"
+        data-testid="date-picker-internal-input"
+        disabled={false}
+        name="symptom_onset"
+        readOnly={true}
         required={false}
+        tabIndex={-1}
         type="text"
         value=""
       />
-      <button
-        aria-haspopup={true}
-        aria-label="Toggle calendar"
-        className="usa-date-picker__button"
-        data-testid="date-picker-button"
-        onClick={[Function]}
-        type="button"
-      >
-         
-      </button>
       <div
-        aria-modal="true"
-        className="usa-date-picker__calendar"
-        data-testid="date-picker-calendar"
-        hidden={true}
-        onKeyDown={[Function]}
-        onKeyUp={[Function]}
-        role="dialog"
-        style={
-          Object {
-            "top": "0px",
+        className="usa-date-picker__wrapper"
+        tabIndex={-1}
+      >
+        <input
+          className="usa-input usa-date-picker__external-input"
+          data-testid="date-picker-external-input"
+          id="symptom_onset"
+          onBlur={[Function]}
+          onFocus={[Function]}
+          onInput={[Function]}
+          required={false}
+          type="text"
+          value=""
+        />
+        <button
+          aria-haspopup={true}
+          aria-label="Toggle calendar"
+          className="usa-date-picker__button"
+          data-testid="date-picker-button"
+          onClick={[Function]}
+          type="button"
+        >
+           
+        </button>
+        <div
+          aria-modal="true"
+          className="usa-date-picker__calendar"
+          data-testid="date-picker-calendar"
+          hidden={true}
+          onKeyDown={[Function]}
+          onKeyUp={[Function]}
+          role="dialog"
+          style={
+            Object {
+              "top": "0px",
+            }
           }
-        }
-      />
-      <div
-        aria-live="polite"
-        className="usa-sr-only usa-date-picker__status"
-        data-testid="date-picker-status"
-        role="status"
-      >
-        
+        />
+        <div
+          aria-live="polite"
+          className="usa-sr-only usa-date-picker__status"
+          data-testid="date-picker-status"
+          role="status"
+        >
+          
+        </div>
       </div>
     </div>
   </div>,

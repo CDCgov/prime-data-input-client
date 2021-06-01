@@ -21,7 +21,7 @@ export const MfaSelect = () => {
     <CardBackground>
       <Card logo>
         <RadioGroup
-          legend="Select authentication method"
+          legend="Select your authentication method"
           buttons={[
             {
               label: "Text message (SMS)",
@@ -32,7 +32,7 @@ export const MfaSelect = () => {
               value: "okta",
             },
             {
-              label: "Google authenticator",
+              label: "Google Authenticator",
               value: "google",
             },
             {

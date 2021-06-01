@@ -58,7 +58,7 @@ describe("SecurityQuestion", () => {
       ["In what city or town was your first job?"]
     );
     fireEvent.click(screen.getByText("Continue"));
-    expect(screen.getByText("Enter a security answer")).toBeInTheDocument();
+    expect(screen.getByText("Enter your answer")).toBeInTheDocument();
   });
 
   it("succeeds on submit w/ valid responses", async () => {

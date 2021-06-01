@@ -22,7 +22,8 @@ export const MfaTotp = (props: Props) => {
           Get your security code via the {props.totpType} application.
         </p>
         <p className="usa-hint font-ui-2xs">
-          To add an authentication application, scan this QR code in the app.
+          To connect SimpleReport to {props.totpType}, scan this QR code in the
+          app.
         </p>
         <div className="display-flex flex-column flex-align-center">
           {props.qrCode ? (

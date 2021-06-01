@@ -23,7 +23,7 @@ export const MfaComplete = () => {
         </p>
         <Button
           className="margin-top-3"
-          label={"Get started with SimpleReport"}
+          label={"Get started"}
           type={"submit"}
         />
       </Card>

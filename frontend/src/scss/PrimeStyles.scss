@@ -56,7 +56,7 @@
   margin-bottom: units(1);
   width: 100%;
 
-  @include at-media("mobile-lg") {
+  @include at-media(mobile-lg) {
     max-width: 22em;
   }
 }
@@ -71,11 +71,11 @@
   &-result {
     padding: 0 1em;
 
-    @include at-media("desktop") {
+    @include at-media(desktop) {
       border-left: 1px solid color($theme-color-prime-gray-light);
     }
 
-    @include at-media("tablet") {
+    @include at-media(tablet) {
       border-left: 1px solid color($theme-color-prime-gray-light);
     }
 
@@ -83,7 +83,7 @@
       margin-top: 1em;
       margin-bottom: 1em;
 
-      @include at-media("desktop") {
+      @include at-media(desktop) {
         margin-top: 0;
       }
 
@@ -104,7 +104,7 @@
       margin-top: 0.5rem;
     }
 
-    @include at-media("desktop") {
+    @include at-media(desktop) {
       flex-direction: row;
 
       > button {
@@ -112,7 +112,7 @@
       }
     }
 
-    @include at-media("tablet") {
+    @include at-media(tablet) {
       flex-direction: row;
 
       > button {
@@ -140,11 +140,11 @@
     }
 
     .checkboxes {
-      @include at-media("desktop") {
+      @include at-media(desktop) {
         margin-top: 1rem;
       }
 
-      @include at-media("tablet") {
+      @include at-media(tablet) {
         margin-top: 1rem;
       }
     }
@@ -160,12 +160,12 @@
       align-items: flex-start;
       width: 100%;
 
-      @include at-media("desktop") {
+      @include at-media(desktop) {
         flex-direction: row;
         width: unset;
       }
 
-      @include at-media("tablet") {
+      @include at-media(tablet) {
         flex-direction: row;
         width: unset;
       }
@@ -173,11 +173,11 @@
       .prime-li {
         width: 100%;
 
-        @include at-media("desktop") {
+        @include at-media(desktop) {
           width: unset;
         }
 
-        @include at-media("tablet") {
+        @include at-media(tablet) {
           width: unset;
         }
       }
@@ -189,21 +189,21 @@
   .prime-li:not(:first-child) {
     margin-top: units(2);
 
-    @include at-media("tablet") {
+    @include at-media(tablet) {
       margin-top: 0;
     }
   }
 }
 
 .queue-item__form--open {
-  @include at-media("tablet") {
+  @include at-media(tablet) {
     align-items: flex-end;
   }
 }
 
 .testdate-checkbox {
   .checkboxes {
-    @include at-media("desktop") {
+    @include at-media(desktop) {
       margin-top: 2.5rem;
     }
   }
@@ -250,6 +250,7 @@
 
       .timer-overtime {
         color: color($theme-color-prime-gray-darkest);
+        margin: 0 units(1);
       }
     }
   }
@@ -262,6 +263,7 @@
 
       .timer-overtime {
         color: color($theme-color-prime-gray-darkest);
+        margin: 0 units(1);
       }
     }
   }
@@ -294,12 +296,12 @@
   background: transparent;
   cursor: pointer;
 
-  @include at-media("desktop") {
+  @include at-media(desktop) {
     top: -0.5rem;
     right: -0.25rem;
   }
 
-  @include at-media("tablet") {
+  @include at-media(tablet) {
     top: -0.5rem;
     right: -0.25rem;
   }
@@ -341,7 +343,7 @@ $results-dropdown-spacing: #{units(4)} - #{units(2)} - 22px - #{units(4)}; // he
   z-index: z-index(500);
   width: 100%;
 
-  @include at-media("desktop") {
+  @include at-media(desktop) {
     max-height: calc(100vh - 70px - #{$results-dropdown-spacing});
     width: unset;
   }
@@ -357,7 +359,7 @@ $results-dropdown-spacing: #{units(4)} - #{units(2)} - 22px - #{units(4)}; // he
       margin: 1.5rem 1rem;
     }
 
-    @include at-media("desktop") {
+    @include at-media(desktop) {
       padding: 1rem;
 
       &:only-child {
@@ -380,7 +382,7 @@ $results-dropdown-spacing: #{units(4)} - #{units(2)} - 22px - #{units(4)}; // he
           overflow-wrap: break-word;
         }
 
-        @include at-media("desktop") {
+        @include at-media(desktop) {
           padding: 0.5rem 1rem;
 
           :first-child {
@@ -481,7 +483,7 @@ $results-dropdown-spacing: #{units(4)} - #{units(2)} - 22px - #{units(4)}; // he
 // Simple modal
 .modal--basic {
   .ReactModal__Content {
-    @include u-margin-x("4");
+    @include u-margin-x(4);
 
     max-height: 90vh;
     width: 700px;
@@ -578,7 +580,7 @@ $results-dropdown-spacing: #{units(4)} - #{units(2)} - 22px - #{units(4)}; // he
   margin: 0 0 16px 0;
   width: 100%;
 
-  @include at-media("desktop") {
+  @include at-media(desktop) {
     display: flex;
     flex-direction: column;
     justify-content: center;
@@ -588,7 +590,7 @@ $results-dropdown-spacing: #{units(4)} - #{units(2)} - 22px - #{units(4)}; // he
   }
 
   .usa-form-group {
-    @include at-media("desktop") {
+    @include at-media(desktop) {
       margin-top: 0;
     }
   }
@@ -611,7 +613,7 @@ $results-dropdown-spacing: #{units(4)} - #{units(2)} - 22px - #{units(4)}; // he
 
 // header at desktop
 
-@include at-media("desktop") {
+@include at-media(desktop) {
   .usa-header--basic {
     .usa-navbar {
       margin-right: units(3);
@@ -664,7 +666,7 @@ $results-dropdown-spacing: #{units(4)} - #{units(2)} - 22px - #{units(4)}; // he
 .usa-logo {
   margin-bottom: 0;
 
-  @include at-media("desktop") {
+  @include at-media(desktop) {
     margin-bottom: 10px;
   }
 }
@@ -937,40 +939,60 @@ $results-dropdown-spacing: #{units(4)} - #{units(2)} - 22px - #{units(4)}; // he
 }
 
 .aoe-modal__footer {
-  background: color("white");
-  border-bottom-left-radius: units(2px);
-  border-top: units(1px) solid color("base-lighter");
-  box-shadow: 0 units(-0.5) units(1) 0 rgba(0, 0, 0, 0.1);
-  height: units(7);
-  margin-bottom: calc(#{units(-2)} + #{units(1px)}); // negative margin + border
-  margin-left: units(-2.5);
-  margin-right: units(-2.5);
-  padding-right: units(2);
-  padding-top: units(1);
-  width:
-    calc(
-      #{units("tablet")} - #{units(2)} - #{units(1px)}
-    ); // tablet - margin - border
+  margin: 0;
+  padding: 0;
+  width: 100%;
+  height: auto;
+
+  @include at-media(tablet) {
+    @include u-padding-y(units(1));
+    background: color("white");
+    border-bottom-left-radius: units(2px);
+    border-top: units(1px) solid color("base-lighter");
+    box-shadow: 0 units(-0.5) units(1) 0 rgba(0, 0, 0, 0.1);
+    margin-bottom:
+      calc(
+        #{units(-2)} + #{units(1px)}
+      ); // negative margin + border
+    margin-left: units(-2.5);
+    margin-right: units(-2.5);
+    width:
+      calc(
+        #{units("tablet")} - #{units(2)} - #{units(1px)}
+      ); // tablet - margin - border
+    padding-right: units(2);
+  }
 }
 
 .sr-time-of-test-buttons-footer {
   text-align: right;
 }
 
-.modal__footer--sticky {
-  bottom: units(7);
-  z-index: 1;
-}
-
 [aria-label="Test questionnaire"] {
-  margin: units(5) 0;
-  max-height: stretch;
-  width: units("tablet");
+  margin: 0;
+  width: 100%;
+  height: 100%;
+
+  @include at-media(tablet) {
+    margin: units(5) 0;
+    max-height: stretch;
+    width: units("tablet");
+    height: unset;
+    position: relative !important;
+    inset: unset !important;
+    padding-bottom: 0 !important;
+  }
 }
 
 @-moz-document url-prefix() {
   [aria-label="Test questionnaire"] {
-    max-height: calc(100vh - #{units(10)});
+    .usa-legend {
+      margin-top: 0;
+    }
+
+    @include at-media(tablet) {
+      max-height: calc(100vh - #{units(10)});
+    }
   }
 }
 
@@ -1015,4 +1037,49 @@ $results-dropdown-spacing: #{units(4)} - #{units(2)} - 22px - #{units(4)}; // he
 
 .usa-label {
   margin-top: 0;
+}
+
+.modal__footer--sticky {
+  z-index: 1;
+  position: absolute;
+  width: 100%;
+  right: 0;
+  bottom: 0;
+  padding: units(2) units(2.5);
+  box-shadow: 0 units(-0.5) units(1) 0 rgba(0, 0, 0, 0.1);
+  background: color("white");
+
+  @include at-media(tablet) {
+    position: fixed;
+    width: unset;
+    right: unset;
+    padding: 0;
+    bottom: units(7);
+  }
+}
+
+.aoe-modal__submit-container {
+  z-index: 1;
+  position: absolute;
+  width: 100%;
+  right: 0;
+  bottom: 0;
+  margin: 0;
+  padding: units(2) units(2.5);
+  background: color("white");
+
+  @include at-media(tablet) {
+    box-shadow: unset;
+    margin: 0 units(-2.5);
+    position: unset;
+    width: unset;
+  }
+}
+
+.aoe-modal__qr-container {
+  padding-bottom: units(10);
+
+  @include at-media(tablet) {
+    padding-bottom: unset;
+  }
 }

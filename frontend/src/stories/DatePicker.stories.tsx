@@ -61,8 +61,10 @@ export const completeDatePicker = (argTypes: {
         aria-describedby="appointment-date-label appointment-date-hint"
         disabled={argTypes.disabled}
       />
-      <Label htmlFor="otherInput">Another unrelated input</Label>
-      <TextInput id="otherInput" name="otherInput" type="text" />
+      <div className="usa-form-group">
+        <Label htmlFor="otherInput">Another unrelated input</Label>
+        <TextInput id="otherInput" name="otherInput" type="text" />
+      </div>
     </FormGroup>
   </Form>
 );

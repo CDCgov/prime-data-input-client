@@ -46,7 +46,7 @@ exports[`WithFacility With two facilities should render with a value 1`] = `
           <p
             className="select-text"
           >
-            Please select which facility you are working at today
+            Please select the testing facility where you are working today.
           </p>
           <button
             className="usa-button usa-button--outline"

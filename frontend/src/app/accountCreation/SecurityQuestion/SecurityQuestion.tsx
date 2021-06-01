@@ -34,7 +34,7 @@ export const SecurityQuestion = () => {
   const validateSecurityAnswer = (): boolean => {
     let error = "";
     if (securityAnswer === "") {
-      error = "Enter a security answer";
+      error = "Enter your answer";
     }
     setSecurityAnswerError(error);
     return error === "";

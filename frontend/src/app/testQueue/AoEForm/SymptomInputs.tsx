@@ -71,7 +71,7 @@ const SymptomInputs: React.FC<Props> = ({
         )}
       </div>
       {!noSymptoms && (
-        <>
+        <div className="usa-form-group">
           <Label htmlFor="meeting-time">Date of symptom onset</Label>
           <span className="usa-hint">mm/dd/yyyy</span>
           {symptomOnsetError && (
@@ -97,7 +97,7 @@ const SymptomInputs: React.FC<Props> = ({
             )}
             ref={symptomOnsetRef}
           />
-        </>
+        </div>
       )}
     </>
   );
