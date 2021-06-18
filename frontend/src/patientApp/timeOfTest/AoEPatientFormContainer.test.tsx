@@ -1,7 +1,8 @@
 import renderer from "react-test-renderer";
 import { MockedProvider } from "@apollo/client/testing";
-import { Provider } from "react-redux";
-import configureStore from "redux-mock-store";
+
+import { appConfig, patient } from "../../storage/store";
+import { patientSample } from "../../config/constants";
 
 import AoEPatientFormContainer from "./AoEPatientFormContainer";
 
@@ -14,26 +15,17 @@ jest.mock("react-router-dom", () => ({
 
 describe("AoEPatientFormContainer", () => {
   beforeAll(() => {
+    appConfig({ ...appConfig(), plid: "123" });
+    patient({ ...patientSample });
     jest
       .useFakeTimers("modern")
       .setSystemTime(new Date("2399-01-01").getTime());
   });
   it("snapshot", () => {
-    const mockStore = configureStore([]);
-    const store = mockStore({
-      patient: {
-        residentCongregateSetting: true,
-        employedInHealthcare: true,
-        birthDate: "",
-      },
-      plid: "foo",
-    });
     const component = renderer.create(
-      <Provider store={store}>
-        <MockedProvider mocks={[]} addTypename={false}>
-          <AoEPatientFormContainer page={""} />
-        </MockedProvider>
-      </Provider>
+      <MockedProvider mocks={[]} addTypename={false}>
+        <AoEPatientFormContainer page={""} />
+      </MockedProvider>
     );
 
     expect(component.toJSON()).toMatchSnapshot();

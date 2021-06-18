@@ -1,61 +1,13 @@
 import React from "react";
 import TestRenderer, { act } from "react-test-renderer";
+import { cleanup } from "@testing-library/react";
 import { BrowserRouter as Router, Route } from "react-router-dom";
-import { Provider } from "react-redux";
-import createMockStore, { MockStoreEnhanced } from "redux-mock-store";
 import { MockedProvider, MockedResponse } from "@apollo/client/testing";
 
 import App, { WHOAMI_QUERY } from "./App";
 import { queueQuery } from "./testQueue/TestQueue";
 
 jest.mock("uuid");
-
-const mockStore = createMockStore([]);
-const mockDispatch = jest.fn();
-
-const store = {
-  dispatch: jest.fn(),
-  organization: {
-    name: "Organization Name",
-  },
-  user: {
-    id: "05b2f71a-9392-442b-aab5-4eb550a864c0",
-    firstName: "Bob",
-    middleName: null,
-    lastName: "Bobberoo",
-    suffix: null,
-    email: "bob@example.com",
-    roleDescription: "Admin user",
-    isAdmin: false,
-    permissions: [
-      "EDIT_PATIENT",
-      "ARCHIVE_PATIENT",
-      "READ_PATIENT_LIST",
-      "EDIT_ORGANIZATION",
-      "START_TEST",
-      "EDIT_FACILITY",
-      "ACCESS_ALL_FACILITIES",
-      "READ_RESULT_LIST",
-      "READ_ARCHIVED_PATIENT_LIST",
-      "SUBMIT_TEST",
-      "MANAGE_USERS",
-      "SEARCH_PATIENTS",
-      "UPDATE_TEST",
-    ],
-  },
-  facilities: [
-    {
-      id: "fec4de56-f4cc-4c61-b3d5-76869ca71296",
-      name: "Testing Site",
-    },
-  ],
-  facility: {
-    id: "fec4de56-f4cc-4c61-b3d5-76869ca71296",
-    name: "Testing Site",
-  },
-};
-
-store.dispatch = mockDispatch;
 
 const WhoAmIQueryMock = {
   request: {
@@ -142,6 +94,7 @@ const facilityQueryMock = {
     },
   },
 };
+
 const WhoAmIErrorQueryMock = {
   request: {
     query: WHOAMI_QUERY,
@@ -149,63 +102,47 @@ const WhoAmIErrorQueryMock = {
   },
   error: new Error("Server connection error"),
 };
-const renderApp = (
-  newStore: MockStoreEnhanced<unknown, {}>,
-  queryMocks: MockedResponse[]
-) => {
+const renderApp = (queryMocks: MockedResponse[]) => {
   return TestRenderer.create(
-    <Provider store={newStore}>
-      <MockedProvider mocks={queryMocks} addTypename={false}>
-        <Router>
-          <Route path="/" component={App} />
-        </Router>
-      </MockedProvider>
-    </Provider>
+    <MockedProvider mocks={queryMocks} addTypename={false}>
+      <Router>
+        <Route path="/" component={App} />
+      </Router>
+    </MockedProvider>
   );
 };
 
 describe("App", () => {
+  afterAll(cleanup);
   it("Render first loading screen", async () => {
-    const mockedStore = mockStore({});
-    const component = renderApp(mockedStore, [WhoAmIQueryMock]);
+    const component = renderApp([WhoAmIQueryMock]);
+
     const tree = component.toJSON();
+
     expect(tree.children).toContain("Loading account information...");
 
     expect(component).toMatchSnapshot();
   });
 
-  it("Render facility loading", async () => {
-    const mockedStore = mockStore({ ...store });
-
-    const component = renderApp(mockedStore, [
-      WhoAmIQueryMock,
-      facilityQueryMock,
-    ]);
-
+  it("Render loading facility queue", async () => {
+    const component = renderApp([WhoAmIQueryMock, facilityQueryMock]);
     await act(async () => {
-      await new Promise((resolve) => setTimeout(resolve, 0));
+      await new Promise((resolve) => setTimeout(resolve, 200));
     });
 
-    const tree = component.toJSON();
-
-    expect(tree.children).toContain("Loading facility information...");
     expect(component).toMatchSnapshot();
   });
 
   it("Render main screen", async () => {
-    const mockedStore = mockStore({ ...store, dataLoaded: true });
-    const component = renderApp(mockedStore, [
-      WhoAmIQueryMock,
-      facilityQueryMock,
-    ]);
+    const component = renderApp([WhoAmIQueryMock, facilityQueryMock]);
     await act(async () => {
-      await new Promise((resolve) => setTimeout(resolve, 0));
+      await new Promise((resolve) => setTimeout(resolve, 200));
     });
     expect(component).toMatchSnapshot();
   });
+
   it("should show error UI", async () => {
-    const mockedStore = mockStore({ ...store, dataLoaded: true });
-    const component = renderApp(mockedStore, [WhoAmIErrorQueryMock]);
+    const component = renderApp([WhoAmIErrorQueryMock]);
     await act(async () => {
       await new Promise((resolve) => setTimeout(resolve, 0));
     });

@@ -1,4 +1,4 @@
-import { gql, useLazyQuery, useQuery } from "@apollo/client";
+import { gql, useLazyQuery, useQuery, useReactiveVar } from "@apollo/client";
 import React, {
   ChangeEventHandler,
   Dispatch,
@@ -10,7 +10,6 @@ import React, {
   useRef,
   useState,
 } from "react";
-import { useSelector } from "react-redux";
 import moment from "moment";
 import classnames from "classnames";
 import { faSlidersH } from "@fortawesome/free-solid-svg-icons";
@@ -26,7 +25,6 @@ import { getUrl } from "../utils/url";
 import { useDocumentTitle, useOutsideClick } from "../utils/hooks";
 import Pagination from "../commonComponents/Pagination";
 import { COVID_RESULTS, TEST_RESULT_DESCRIPTIONS } from "../constants";
-import "./TestResultsList.scss";
 import Button from "../commonComponents/Button/Button";
 import { useDebounce } from "../testQueue/addToQueue/useDebounce";
 import {
@@ -38,10 +36,13 @@ import { QUERY_PATIENT } from "../testQueue/addToQueue/AddToQueueSearch";
 import { Patient } from "../patients/ManagePatients";
 import SearchResults from "../testQueue/addToQueue/SearchResults";
 import Select from "../commonComponents/Select";
+import { facilities } from "../../storage/store";
 
 import TestResultPrintModal from "./TestResultPrintModal";
 import TestResultCorrectionModal from "./TestResultCorrectionModal";
 import TestResultDetailsModal from "./TestResultDetailsModal";
+
+import "./TestResultsList.scss";
 
 type Results = keyof typeof TEST_RESULT_DESCRIPTIONS;
 
@@ -446,10 +447,8 @@ type TestResultsListProps = Omit<Props, OmittedProps>;
 
 const TestResultsList = (props: TestResultsListProps) => {
   useDocumentTitle("Results");
-
-  const activeFacilityId = useSelector(
-    (state) => (state as any).facility.id as string
-  );
+  const { selectedFacility } = useReactiveVar<FacilitiesState>(facilities);
+  const activeFacilityId = selectedFacility?.id;
 
   const [selectedPatientId, setSelectedPatientId] = useState<string>("");
   const [resultFilter, setResultFilter] = useState<string>("");
@@ -459,7 +458,7 @@ const TestResultsList = (props: TestResultsListProps) => {
 
   const queryVariables: {
     patientId?: string;
-    facilityId: string;
+    facilityId: string | null | undefined;
     result?: string;
     pageNumber: number;
     pageSize: number;
@@ -471,7 +470,7 @@ const TestResultsList = (props: TestResultsListProps) => {
 
   const countQueryVariables: {
     patientId?: string;
-    facilityId: string;
+    facilityId: string | null | undefined;
     result?: string;
   } = { facilityId: activeFacilityId };
 
@@ -495,7 +494,7 @@ const TestResultsList = (props: TestResultsListProps) => {
     fetchPolicy: "no-cache",
   });
 
-  if (activeFacilityId.length < 1) {
+  if (!activeFacilityId) {
     return <div>"No facility selected"</div>;
   }
 

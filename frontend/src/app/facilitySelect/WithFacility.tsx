@@ -1,47 +1,66 @@
-import React from "react";
-import { useDispatch, useSelector, connect } from "react-redux";
+/* eslint-disable graphql/template-strings */
+import { useCallback, useMemo, FC, useEffect } from "react";
 import { useHistory } from "react-router-dom";
 
-import { RootState, updateFacility } from "../store";
+import { useFacilities } from "../../hooks/useFacilities";
+import { useAppConfig } from "../../hooks/useAppConfig";
 import { getFacilityIdFromUrl } from "../utils/url";
 
 import FacilityPopup from "./FacilityPopup";
 import FacilitySelect from "./FacilitySelect";
 
-const Loading: React.FC<{}> = () => <p>Loading facility information...</p>;
+const Loading: FC = () => <p>Loading facility information...</p>;
 
 interface Props {}
 
-const WithFacility: React.FC<Props> = ({ children }) => {
-  const dispatch = useDispatch();
+const WithFacility: FC<Props> = ({ children }) => {
   const history = useHistory();
-  const dataLoaded = useSelector<RootState, boolean>(
-    (state) => state.dataLoaded
-  );
-  const facilities = useSelector<RootState, Facility[]>(
-    (state) => state.facilities
-  );
-  const facilityInStore = useSelector<RootState, Pick<Facility, "id" | "name">>(
-    (state) => state.facility
-  );
-  const facilityFromUrl = facilities.find(
-    (f) => f.id === getFacilityIdFromUrl()
+  const {
+    setCurrentFacility,
+    facilities: { selectedFacility, availableFacilities },
+  } = useFacilities();
+  const {
+    config: { dataLoaded },
+  } = useAppConfig();
+
+  const facilityFromUrl = useMemo(
+    () => availableFacilities.find((f) => f.id === getFacilityIdFromUrl()),
+    [availableFacilities]
   );
 
-  const setFacilityProp = (facilityId: string) => {
-    history.push({ search: `?facility=${facilityId}` });
-  };
+  const setFacilityProp = useCallback(
+    (facilityId: string) => {
+      history.push({ search: `?facility=${facilityId}` });
+    },
+    [history]
+  );
 
-  const setActiveFacility = (facility: Facility) => {
-    dispatch(updateFacility(facility));
-    setFacilityProp(facility.id);
-  };
+  const setActiveFacility = useCallback(
+    (facility: Facility) => {
+      setCurrentFacility(facility);
+      setFacilityProp(facility.id);
+    },
+    [setFacilityProp, setCurrentFacility]
+  );
+
+  useEffect(() => {
+    if (facilityFromUrl?.id) {
+      setActiveFacility(facilityFromUrl);
+    }
+    if (
+      availableFacilities.length === 1 &&
+      (!facilityFromUrl?.id || !selectedFacility?.id)
+    ) {
+      setActiveFacility(availableFacilities[0]);
+    }
+    // eslint-disable-next-line
+  }, [selectedFacility?.id, facilityFromUrl, availableFacilities]);
 
   if (!dataLoaded) {
     return <Loading />;
   }
 
-  if (facilities.length === 0) {
+  if (availableFacilities.length === 0) {
     return (
       <FacilityPopup>
         <p>You do not have access to any facilities at this time.</p>
@@ -52,29 +71,20 @@ const WithFacility: React.FC<Props> = ({ children }) => {
     );
   }
 
-  if (
-    facilities.length === 1 &&
-    (!facilityFromUrl?.id || !facilityInStore?.id)
-  ) {
-    setActiveFacility(facilities[0]);
-    return <Loading />;
+  if (availableFacilities.length > 1 && !selectedFacility?.id) {
+    return (
+      <FacilitySelect
+        facilities={availableFacilities}
+        setActiveFacility={setActiveFacility}
+      />
+    );
   }
 
-  if (facilityFromUrl?.id && !facilityInStore?.id) {
-    setActiveFacility(facilityFromUrl);
-    return <Loading />;
-  }
-
-  if (facilityFromUrl?.id && facilityInStore?.id) {
+  if (selectedFacility?.id) {
     return <>{children}</>;
   }
 
-  return (
-    <FacilitySelect
-      facilities={facilities}
-      setActiveFacility={setActiveFacility}
-    />
-  );
+  return <Loading />;
 };
 
-export default connect()(WithFacility);
+export default WithFacility;

@@ -1,16 +1,9 @@
 import { render, screen, fireEvent } from "@testing-library/react";
 import { act } from "react-dom/test-utils";
-import { Provider } from "react-redux";
 import { MemoryRouter, Route } from "react-router";
-import createMockStore from "redux-mock-store";
 
+import { appConfig } from "../../../storage/store";
 import { PasswordCreate } from "../../accountCreation/PasswordCreate/PasswordCreate";
-
-const mockStore = createMockStore([]);
-
-const store = mockStore({
-  activationToken: "foo",
-});
 
 jest.mock("../../accountCreation/AccountCreationApiService", () => ({
   AccountCreationApi: {
@@ -27,15 +20,16 @@ jest.mock("../../accountCreation/AccountCreationApiService", () => ({
 }));
 
 describe("PasswordCreate", () => {
+  beforeAll(() => {
+    appConfig({ ...appConfig(), activationToken: "foo" });
+  });
   beforeEach(() => {
     render(
       <MemoryRouter initialEntries={["/set-password"]}>
-        <Provider store={store}>
-          <Route path="/set-password" component={PasswordCreate} />
-          <Route path="/set-recovery-question">
-            <p>Password set successfully.</p>
-          </Route>
-        </Provider>
+        <Route path="/set-password" component={PasswordCreate} />
+        <Route path="/set-recovery-question">
+          <p>Password set successfully.</p>
+        </Route>
       </MemoryRouter>
     );
   });

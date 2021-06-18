@@ -1,16 +1,10 @@
 import { render, screen, fireEvent } from "@testing-library/react";
 import { act } from "react-dom/test-utils";
-import { Provider } from "react-redux";
 import { MemoryRouter, Route } from "react-router";
-import createMockStore from "redux-mock-store";
+
+import { appConfig } from "../../../storage/store";
 
 import { PasswordCreate } from "./PasswordCreate";
-
-const mockStore = createMockStore([]);
-
-const store = mockStore({
-  activationToken: "foo",
-});
 
 jest.mock("../AccountCreationApiService", () => ({
   AccountCreationApi: {
@@ -28,18 +22,19 @@ jest.mock("../AccountCreationApiService", () => ({
 
 describe("PasswordCreate", () => {
   beforeEach(() => {
+    appConfig({ ...appConfig(), activationToken: "foo" });
     render(
       <MemoryRouter initialEntries={["/set-password"]}>
-        <Provider store={store}>
-          <Route path="/set-password" component={PasswordCreate} />
-          <Route path="/set-recovery-question">
-            <p>Password set successfully.</p>
-          </Route>
-        </Provider>
+        <Route path="/set-password" component={PasswordCreate} />
+        <Route path="/set-recovery-question">
+          <p>Password set successfully.</p>
+        </Route>
       </MemoryRouter>
     );
   });
-
+  afterAll(() => {
+    appConfig({ ...appConfig(), activationToken: null });
+  });
   const strengthLabel = (label: string) => (content: string, element: any) => {
     return (
       element.tagName.toLowerCase() === "span" && content.startsWith(label)

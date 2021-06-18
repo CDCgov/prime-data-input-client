@@ -1,11 +1,10 @@
-import { useSelector } from "react-redux";
-
 import siteLogo from "../img/simplereport-logomark-color.svg";
+import { useAppConfig } from "../hooks/useAppConfig";
 
 const PatientHeader = () => {
-  const organization = useSelector(
-    (state) => (state as any).organization as Organization
-  );
+  const {
+    config: { organization },
+  } = useAppConfig();
 
   return (
     <header className="border-bottom border-base-lighter">

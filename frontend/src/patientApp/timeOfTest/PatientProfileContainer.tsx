@@ -1,17 +1,20 @@
 import { useState } from "react";
 import { Redirect } from "react-router-dom";
-import { connect, useSelector } from "react-redux";
 
 import Button from "../../app/commonComponents/Button/Button";
 import PatientTimeOfTestContainer from "../PatientTimeOfTestContainer";
+import { useAppConfig } from "../../hooks/useAppConfig";
+import { usePatient } from "../../hooks/usePatient";
 
 import PatientProfile from "./PatientProfile";
 
 const PatientProfileContainer = () => {
   const [nextPage, setNextPage] = useState(false);
   const [editPage, setEditPage] = useState(false);
-  const plid = useSelector((state: any) => state.plid);
-  const patient = useSelector((state) => (state as any).patient as any);
+  const {
+    config: { plid },
+  } = useAppConfig();
+  const { patient } = usePatient();
 
   if (editPage) {
     return (
@@ -67,4 +70,4 @@ const PatientProfileContainer = () => {
   );
 };
 
-export default connect()(PatientProfileContainer);
+export default PatientProfileContainer;

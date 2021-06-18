@@ -10,4 +10,5 @@ interface User {
   type?: UserType; // TODO: remove optional prop
   permissions?: UserPermission[]; // TODO: remove optional prop
   roleDescription: RoleDescription;
+  isAdmin: boolean;
 }

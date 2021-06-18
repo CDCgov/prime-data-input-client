@@ -1,26 +1,8 @@
 import { fireEvent, render, screen, waitFor } from "@testing-library/react";
-import { Provider } from "react-redux";
 import { MemoryRouter } from "react-router";
-import createMockStore from "redux-mock-store";
 import { useTrackEvent } from "@microsoft/applicationinsights-react-js";
 
 import Header from "../Header";
-
-const mockStore = createMockStore([]);
-
-const store = mockStore({
-  organization: {
-    name: "Organization Name",
-  },
-  user: {
-    firstName: "Kim",
-    lastName: "Mendoza",
-  },
-  facilities: [
-    { id: "1", name: "Facility 1" },
-    { id: "2", name: "Facility 2" },
-  ],
-});
 
 jest.mock("@microsoft/applicationinsights-react-js", () => ({
   useAppInsightsContext: () => {},
@@ -41,9 +23,7 @@ describe("Header.tsx", () => {
 
   const WrappedHeader: React.FC = () => (
     <MemoryRouter>
-      <Provider store={store}>
-        <Header />
-      </Provider>
+      <Header />
     </MemoryRouter>
   );
 

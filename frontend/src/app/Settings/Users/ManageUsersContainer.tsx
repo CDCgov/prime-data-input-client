@@ -1,8 +1,8 @@
 import React from "react";
-import { gql, useQuery, useMutation } from "@apollo/client";
-import { useSelector } from "react-redux";
+import { gql, useQuery, useMutation, useReactiveVar } from "@apollo/client";
 
 import { UserRole, UserPermission, Role } from "../../permissions";
+import { appConfig } from "../../../storage/store";
 
 import ManageUsers from "./ManageUsers";
 
@@ -145,7 +145,8 @@ export interface NewUserInvite {
 }
 
 const ManageUsersContainer: any = () => {
-  const loggedInUser = useSelector((state) => (state as any).user as User);
+  const { user: loggedInUser } = useReactiveVar(appConfig);
+
   const [updateUserPrivileges] = useMutation(UPDATE_USER_PRIVILEGES);
   const [deleteUser] = useMutation(DELETE_USER);
   const [addUserToOrg] = useMutation(ADD_USER_TO_ORG);

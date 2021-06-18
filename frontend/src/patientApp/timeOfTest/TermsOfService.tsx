@@ -1,9 +1,9 @@
 import React, { useState } from "react";
-import { useSelector } from "react-redux";
 import { Redirect, RouteComponentProps, withRouter } from "react-router";
 import classnames from "classnames";
 
 import Button from "../../app/commonComponents/Button/Button";
+import { useAppConfig } from "../../hooks/useAppConfig";
 
 import ToS from "./ToS";
 
@@ -17,7 +17,9 @@ const TermsOfService: React.FunctionComponent<Props> = ({
   onAgree,
 }) => {
   const [nextPage, setNextPage] = useState(false);
-  const plid = useSelector((state: any) => state.plid);
+  const {
+    config: { plid },
+  } = useAppConfig();
 
   if (nextPage) {
     return (

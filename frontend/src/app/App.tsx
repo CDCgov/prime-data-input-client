@@ -1,17 +1,18 @@
 import React, { useEffect } from "react";
 import { gql, useQuery } from "@apollo/client";
 import { ToastContainer } from "react-toastify";
-import { useDispatch, connect } from "react-redux";
 import "react-toastify/dist/ReactToastify.css";
 import { Redirect, Route, Switch } from "react-router-dom";
 import { ApplicationInsights } from "@microsoft/applicationinsights-web";
+
+import { useFacilities } from "../hooks/useFacilities";
+import { useAppConfig } from "../hooks/useAppConfig";
 
 import ProtectedRoute from "./commonComponents/ProtectedRoute";
 import PrimeErrorBoundary from "./PrimeErrorBoundary";
 import Header from "./commonComponents/Header";
 import USAGovBanner from "./commonComponents/USAGovBanner";
 import LoginView from "./LoginView";
-import { setInitialState } from "./store";
 import TestResultsList from "./testResults/TestResultsList";
 import TestQueueContainer from "./testQueue/TestQueueContainer";
 import ManagePatientsContainer from "./patients/ManagePatientsContainer";
@@ -48,36 +49,34 @@ export const WHOAMI_QUERY = gql`
 
 const App = () => {
   const appInsights = getAppInsights();
+  const { setInitFacilities } = useFacilities();
+  const { setInitialData } = useAppConfig();
 
-  const dispatch = useDispatch();
   const { data, loading, error } = useQuery(WHOAMI_QUERY, {
     fetchPolicy: "no-cache",
   });
 
   useEffect(() => {
     if (!data) return;
-
-    dispatch(
-      setInitialState({
-        dataLoaded: true,
-        organization: {
-          name: data.whoami.organization?.name,
-        },
-        facilities: data.whoami.organization.testingFacility,
-        facility: null,
-        user: {
-          id: data.whoami.id,
-          firstName: data.whoami.firstName,
-          middleName: data.whoami.middleName,
-          lastName: data.whoami.lastName,
-          suffix: data.whoami.suffix,
-          email: data.whoami.email,
-          roleDescription: data.whoami.roleDescription,
-          isAdmin: data.whoami.isAdmin,
-          permissions: data.whoami.permissions,
-        },
-      })
-    );
+    setInitFacilities(data.whoami.organization.testingFacility);
+    setInitialData({
+      user: {
+        id: data.whoami.id,
+        firstName: data.whoami.firstName,
+        middleName: data.whoami.middleName,
+        lastName: data.whoami.lastName,
+        suffix: data.whoami.suffix,
+        email: data.whoami.email,
+        roleDescription: data.whoami.roleDescription,
+        isAdmin: data.whoami.isAdmin,
+        permissions: data.whoami.permissions,
+      },
+      organization: {
+        name: data.whoami.organization?.name,
+      },
+      dataLoaded: true,
+      activationToken: null,
+    });
     // eslint-disable-next-line
   }, [data]);
 
@@ -175,4 +174,4 @@ const App = () => {
   );
 };
 
-export default connect()(App);
+export default App;

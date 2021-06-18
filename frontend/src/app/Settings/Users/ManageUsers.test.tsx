@@ -1,9 +1,9 @@
 import { MockedProvider } from "@apollo/client/testing";
 import { render, fireEvent, waitFor, screen } from "@testing-library/react";
-import { Provider } from "react-redux";
 import { MemoryRouter } from "react-router-dom";
-import configureStore from "redux-mock-store";
 
+import { facilitySample } from "../../../config/constants";
+import { appConfig, facilities } from "../../../storage/store";
 import { displayFullName } from "../../utils";
 
 import ManageUsers, { SettingsUsers } from "./ManageUsers";
@@ -23,22 +23,8 @@ const loggedInUser = {
   email: "bob@bobberoo.org",
   suffix: "",
   roleDescription: "Admin user",
+  isAdmin: true,
 };
-
-const mockStore = configureStore([]);
-const store = mockStore({
-  organization: {
-    name: "Organization Name",
-  },
-  user: {
-    firstName: "Kim",
-    lastName: "Mendoza",
-  },
-  facilities: [
-    { id: "1", name: "Facility 1" },
-    { id: "2", name: "Facility 2" },
-  ],
-});
 
 const users: SettingsUsers[keyof SettingsUsers][] = [
   {
@@ -119,15 +105,26 @@ let inputValue = (value: string) => ({ target: { value } });
 
 const TestContainer: React.FC = ({ children }) => (
   <MemoryRouter>
-    <Provider store={store}>
-      <MockedProvider mocks={mocks}>
-        <>{children}</>
-      </MockedProvider>
-    </Provider>
+    <MockedProvider mocks={mocks}>
+      <>{children}</>
+    </MockedProvider>
   </MemoryRouter>
 );
 
 describe("ManageUsers", () => {
+  beforeAll(() => {
+    facilities({
+      selectedFacility: null,
+      availableFacilities: [
+        { ...facilitySample, id: "1", name: "Facility 1" },
+        { ...facilitySample, id: "2", name: "Facility 2" },
+      ],
+    });
+    appConfig({
+      ...appConfig(),
+      user: { ...loggedInUser, firstName: "Kim", lastName: "Mendoza" },
+    });
+  });
   beforeEach(() => {
     updateUserPrivileges = jest.fn(() => Promise.resolve());
     addUserToOrg = jest.fn(() =>
@@ -422,19 +419,17 @@ describe("ManageUsers", () => {
     await waitFor(() => {
       render(
         <MemoryRouter>
-          <Provider store={store}>
-            <MockedProvider mocks={updatedMocks}>
-              <ManageUsers
-                users={users}
-                loggedInUser={loggedInUser}
-                allFacilities={allFacilities}
-                updateUserPrivileges={updateUserPrivileges}
-                addUserToOrg={addUserToOrg}
-                deleteUser={deleteUser}
-                getUsers={getUsers}
-              />
-            </MockedProvider>
-          </Provider>
+          <MockedProvider mocks={updatedMocks}>
+            <ManageUsers
+              users={users}
+              loggedInUser={loggedInUser}
+              allFacilities={allFacilities}
+              updateUserPrivileges={updateUserPrivileges}
+              addUserToOrg={addUserToOrg}
+              deleteUser={deleteUser}
+              getUsers={getUsers}
+            />
+          </MockedProvider>
         </MemoryRouter>
       );
     });

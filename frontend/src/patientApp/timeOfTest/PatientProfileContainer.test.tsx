@@ -1,11 +1,10 @@
 import renderer from "react-test-renderer";
 import { MockedProvider } from "@apollo/client/testing";
-import { Provider } from "react-redux";
-import configureStore from "redux-mock-store";
+
+import { patient } from "../../storage/store";
+import { patientSample } from "../../config/constants";
 
 import PatientProfileContainer from "./PatientProfileContainer";
-
-const mockStore = configureStore([]);
 
 jest.mock("react-router-dom", () => ({
   useHistory: () => ({
@@ -15,22 +14,14 @@ jest.mock("react-router-dom", () => ({
 }));
 
 describe("PatientProfileContainer", () => {
+  beforeAll(() => {
+    patient(patientSample);
+  });
   it("snapshot", () => {
-    const store = mockStore({
-      patient: {
-        residentCongregateSetting: true,
-        employedInHealthcare: true,
-        birthDate: "",
-        street: "8 Pine Ct",
-      },
-      plid: "definitely not null I promise",
-    });
     const component = renderer.create(
-      <Provider store={store}>
-        <MockedProvider mocks={[]} addTypename={false}>
-          <PatientProfileContainer />
-        </MockedProvider>
-      </Provider>
+      <MockedProvider mocks={[]} addTypename={false}>
+        <PatientProfileContainer />
+      </MockedProvider>
     );
 
     expect(component.toJSON()).toMatchSnapshot();

@@ -1,16 +1,9 @@
 import renderer from "react-test-renderer";
 import { render, fireEvent, RenderResult } from "@testing-library/react";
-import { Provider } from "react-redux";
-import configureStore from "redux-mock-store";
 
 import DOB from "./DOB";
 
-const mockStore = configureStore([]);
-const mockContainer = (store: any) => (
-  <Provider store={store}>
-    <DOB />
-  </Provider>
-);
+const mockContainer = () => <DOB />;
 
 jest.mock("../PxpApiService", () => {
   jest.fn();
@@ -20,10 +13,7 @@ describe("DOB", () => {
   describe("snapshot", () => {
     let component: renderer.ReactTestRenderer;
     beforeEach(() => {
-      const store = mockStore({
-        plid: "foo",
-      });
-      component = renderer.create(mockContainer(store));
+      component = renderer.create(mockContainer());
     });
     it("matches", () => {
       expect(component.toJSON()).toMatchSnapshot();
@@ -40,10 +30,7 @@ describe("DOB", () => {
     }
 
     beforeEach(() => {
-      const store = mockStore({
-        plid: "foo",
-      });
-      utils = render(mockContainer(store));
+      utils = render(mockContainer());
     });
 
     it("validates birthdays", async () => {

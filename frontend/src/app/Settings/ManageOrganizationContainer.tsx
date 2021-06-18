@@ -1,5 +1,4 @@
 import React from "react";
-import { useDispatch, connect } from "react-redux";
 import { gql, useQuery, useMutation } from "@apollo/client";
 import { toast } from "react-toastify";
 import {
@@ -9,7 +8,7 @@ import {
 
 import Alert from "../commonComponents/Alert";
 import { showNotification } from "../utils";
-import { updateOrganization } from "../store";
+import { useAppConfig } from "../../hooks/useAppConfig";
 
 import ManageOrganization from "./ManageOrganization";
 
@@ -37,9 +36,9 @@ const ManageOrganizationContainer: any = () => {
   const { data, loading, error } = useQuery<Data, {}>(GET_ORGANIZATION, {
     fetchPolicy: "no-cache",
   });
-  const dispatch = useDispatch();
   const [setOrganization] = useMutation(SET_ORGANIZATION);
   const appInsights = useAppInsightsContext();
+  const { updateOrganizationName } = useAppConfig();
   const trackSaveSettings = useTrackEvent(
     appInsights,
     "Save Organization",
@@ -74,11 +73,11 @@ const ManageOrganizationContainer: any = () => {
         />
       );
       showNotification(toast, alert);
-      dispatch(updateOrganization({ name }));
+      updateOrganizationName(name);
     });
   };
 
   return <ManageOrganization name={data.organization.name} onSave={onSave} />;
 };
 
-export default connect()(ManageOrganizationContainer);
+export default ManageOrganizationContainer;

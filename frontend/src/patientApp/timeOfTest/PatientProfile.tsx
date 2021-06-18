@@ -1,6 +1,5 @@
 import moment from "moment";
 import { Redirect } from "react-router-dom";
-import { useSelector } from "react-redux";
 
 import { formatFullName } from "../../app/utils/user";
 import { formatAddress, newLineSpan } from "../../app/utils/address";
@@ -10,13 +9,17 @@ import {
   GENDER_VALUES,
   TRIBAL_AFFILIATION_VALUES,
 } from "../../app/constants";
+import { useAppConfig } from "../../hooks/useAppConfig";
 
 interface Props {
   patient: any;
 }
 
 const PatientProfile = ({ patient }: Props) => {
-  const plid = useSelector((state: any) => state.plid);
+  const {
+    config: { plid },
+  } = useAppConfig();
+
   if (!patient) {
     return (
       <Redirect

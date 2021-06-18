@@ -1,9 +1,7 @@
-import { useEffect, useState } from "react";
-import { connect, useSelector, useDispatch } from "react-redux";
+import React, { useEffect, useState } from "react";
 import { Redirect, useHistory } from "react-router-dom";
 import { toast } from "react-toastify";
 
-import { setPatient as reduxSetPatient } from "../../app/store";
 import { PxpApi } from "../../patientApp/PxpApiService";
 import PersonForm, {
   PersonFormView,
@@ -12,17 +10,24 @@ import PatientTimeOfTestContainer from "../PatientTimeOfTestContainer";
 import { showNotification } from "../../app/utils";
 import Alert from "../../app/commonComponents/Alert";
 import Button from "../../app/commonComponents/Button/Button";
+import { usePatient } from "../../hooks/usePatient";
+import { useFacilities } from "../../hooks/useFacilities";
+import { useAppConfig } from "../../hooks/useAppConfig";
 
 const PatientFormContainer = () => {
   const history = useHistory();
   const [nextPage, setNextPage] = useState(false);
-  const patient = useSelector((state: any) => state.patient);
-  const facility = useSelector((state: any) => state.facility);
 
-  const dispatch = useDispatch();
+  const {
+    config: { plid },
+  } = useAppConfig();
+  const { patient, setCurrentPatient } = usePatient();
+  const {
+    facilities: { selectedFacility },
+  } = useFacilities();
 
-  const plid = useSelector((state: any) => state.plid);
-  const patientInStore = useSelector((state: any) => state.patient);
+  const facility = selectedFacility;
+  const patientInStore = patient as PersonFormData;
 
   useEffect(() => {
     window.scrollTo(0, 0);
@@ -54,8 +59,8 @@ const PatientFormContainer = () => {
       ...withoutAddress
     } = person;
     const updatedPatientFromApi = await PxpApi.updatePatient(
-      plid,
-      patientInStore.birthDate,
+      plid as string,
+      patientInStore.birthDate.toString(),
       {
         ...withoutAddress,
         address: {
@@ -71,16 +76,14 @@ const PatientFormContainer = () => {
       toast,
       <Alert type="success" title={`Your profile changes have been saved`} />
     );
-
-    dispatch(
-      reduxSetPatient({
-        ...updatedPatientFromApi,
-      })
-    );
-
+    setCurrentPatient({
+      ...updatedPatientFromApi,
+    });
     setNextPage(true);
   };
-
+  if (!patient) {
+    return <>Patient is not selected </>;
+  }
   return (
     <PatientTimeOfTestContainer currentPage={"profile"}>
       <main className={"prime-edit-patient prime-home padding-top-0"}>
@@ -89,9 +92,11 @@ const PatientFormContainer = () => {
             patient={{
               ...patient,
               facilityId:
-                patient.facility === null ? null : patient.facility?.id,
+                patient?.facility === null
+                  ? null
+                  : (patient?.facility?.id as string),
             }}
-            activeFacilityId={facility.id}
+            activeFacilityId={facility?.id || ""}
             patientId={patient.internalId}
             hideFacilitySelect={true}
             savePerson={savePerson}
@@ -119,4 +124,4 @@ const PatientFormContainer = () => {
   );
 };
 
-export default connect()(PatientFormContainer);
+export default PatientFormContainer;

@@ -1,15 +1,13 @@
+import { useReactiveVar } from "@apollo/client";
 import React from "react";
-import { useSelector } from "react-redux";
 
+import { appConfig } from "../../storage/store";
 import { formatFullName } from "../utils/user";
 
 import "./FacilitySelect.scss";
 
 const FacilityPopup: React.FC = ({ children }) => {
-  const organization = useSelector(
-    (state) => (state as any).organization as Organization
-  );
-  const user = useSelector((state) => (state as any).user as User);
+  const { user, organization } = useReactiveVar(appConfig);
 
   return (
     <main className="prime-home" id="facility-select">

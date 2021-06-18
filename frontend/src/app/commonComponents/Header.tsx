@@ -2,7 +2,6 @@ import React, { useState } from "react";
 import { FontAwesomeIcon } from "@fortawesome/react-fontawesome";
 import classNames from "classnames";
 import { v4 as uuidv4 } from "uuid";
-import { useSelector, connect } from "react-redux";
 import {
   useAppInsightsContext,
   useTrackEvent,
@@ -12,6 +11,8 @@ import { PATIENT_TERM_PLURAL_CAP } from "../../config/constants";
 import { formatFullName } from "../utils/user";
 import siteLogo from "../../img/simplereport-logo-color.svg";
 import { hasPermission, appPermissions } from "../permissions";
+import { useAppConfig } from "../../hooks/useAppConfig";
+import { useFacilities } from "../../hooks/useFacilities";
 
 import Button from "./Button/Button";
 import Dropdown from "./Dropdown";
@@ -29,16 +30,13 @@ const Header: React.FC<{}> = () => {
     }
   };
 
-  const organization = useSelector(
-    (state) => (state as any).organization as Organization
-  );
-  const facilities = useSelector(
-    (state) => ((state as any).facilities as Facility[]) || []
-  );
-  const facility = useSelector(
-    (state) => ((state as any).facility as Facility) || { id: "", name: "" }
-  );
-  const user = useSelector((state) => (state as any).user as User);
+  const {
+    facilities: { selectedFacility, availableFacilities },
+  } = useFacilities();
+  const {
+    config: { organization, user },
+  } = useAppConfig();
+
   const [menuVisible, setMenuVisible] = useState(false);
   const {
     ref: staffDefailsRef,
@@ -200,7 +198,7 @@ const Header: React.FC<{}> = () => {
                     {user.roleDescription}
                   </span>
                 </li>
-                <li className="usa-sidenav__item">{facility.name}</li>
+                <li className="usa-sidenav__item">{selectedFacility?.name}</li>
               </ul>
             </li>
             <div>
@@ -285,9 +283,9 @@ const Header: React.FC<{}> = () => {
           </ul>
           <div className="prime-facility-select">
             <Dropdown
-              selectedValue={facility.id}
+              selectedValue={selectedFacility?.id || ""}
               onChange={onFacilitySelect}
-              options={facilities.map(({ name, id }) => ({
+              options={availableFacilities.map(({ name, id }) => ({
                 label: name,
                 value: id,
               }))}
@@ -329,7 +327,9 @@ const Header: React.FC<{}> = () => {
                       {user.roleDescription}
                     </span>
                   </li>
-                  <li className="usa-sidenav__item">{facility.name}</li>
+                  <li className="usa-sidenav__item">
+                    {selectedFacility?.name}
+                  </li>
                   <li className="usa-sidenav__item navlink__support">
                     <a
                       href="https://simplereport.gov/support"
@@ -371,4 +371,4 @@ const Header: React.FC<{}> = () => {
   );
 };
 
-export default connect()(Header);
+export default Header;

@@ -95,7 +95,7 @@ exports[`PatientProfileContainer snapshot 1`] = `
         Name
       </h3>
       <p>
-        undefined
+        Jhon Sample Doe
       </p>
       <h3
         className="font-heading-sm"
@@ -111,7 +111,7 @@ exports[`PatientProfileContainer snapshot 1`] = `
         Date of birth
       </h3>
       <p>
-        Not provided
+        02/02/2020
       </p>
       <h3
         className="font-heading-sm"
@@ -127,16 +127,7 @@ exports[`PatientProfileContainer snapshot 1`] = `
         Address
       </h3>
       <p>
-        <span
-          className="display-block"
-        >
-          8 Pine Ct
-        </span>
-        <span
-          className="display-block"
-        >
-          undefinedundefined
-        </span>
+        Not provided
       </p>
       <h3
         className="font-heading-sm"
@@ -159,7 +150,7 @@ exports[`PatientProfileContainer snapshot 1`] = `
         Race
       </h3>
       <p>
-        Not provided
+        Prefer not to answer
       </p>
       <h3
         className="font-heading-sm"
@@ -167,7 +158,7 @@ exports[`PatientProfileContainer snapshot 1`] = `
         Ethnicity
       </h3>
       <p>
-        Not provided
+        Yes
       </p>
       <h3
         className="font-heading-sm"
@@ -183,7 +174,7 @@ exports[`PatientProfileContainer snapshot 1`] = `
         Biological sex
       </h3>
       <p>
-        Not provided
+        Female
       </p>
       <h2
         className="prime-formgroup-heading font-heading-lg"

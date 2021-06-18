@@ -1,19 +1,12 @@
-import {
-  render,
-  screen,
-  fireEvent,
-  cleanup,
-  within,
-} from "@testing-library/react";
+import { render, screen, fireEvent, within } from "@testing-library/react";
 import { MockedProvider } from "@apollo/client/testing";
-import { Provider } from "react-redux";
-import configureStore from "redux-mock-store";
 import { act } from "react-dom/test-utils";
 import { MemoryRouter, Route } from "react-router";
 
-import AddPatient, { ADD_PATIENT } from "./AddPatient";
+import { facilities } from "../../storage/store";
+import { facilitySample } from "../../config/constants";
 
-const mockStore = configureStore([]);
+import AddPatient, { ADD_PATIENT } from "./AddPatient";
 
 jest.mock("../utils/smartyStreets", () => ({
   getBestSuggestion: jest.fn(),
@@ -57,21 +50,13 @@ const fillOutForm = (
 };
 
 describe("AddPatient", () => {
-  afterEach(cleanup);
   describe("No facility selected", () => {
     beforeEach(() => {
-      const store = mockStore({
-        facility: {
-          id: "",
-        },
-      });
       render(
         <MemoryRouter>
-          <Provider store={store}>
-            <MockedProvider mocks={[]} addTypename={false}>
-              <AddPatient />
-            </MockedProvider>
-          </Provider>
+          <MockedProvider mocks={[]} addTypename={false}>
+            <AddPatient />
+          </MockedProvider>
         </MemoryRouter>
       );
     });
@@ -93,11 +78,17 @@ describe("AddPatient", () => {
 
   describe("Facility selected", () => {
     const mockFacilityID = "b0d2041f-93c9-4192-b19a-dd99c0044a7e";
-    const store = mockStore({
-      facility: {
-        id: mockFacilityID,
-      },
-      facilities: [{ id: mockFacilityID, name: "123" }],
+    beforeAll(() => {
+      facilities({
+        selectedFacility: {
+          ...facilitySample,
+          id: mockFacilityID,
+          name: "123",
+        },
+        availableFacilities: [
+          { ...facilitySample, id: mockFacilityID, name: "123" },
+        ],
+      });
     });
     beforeEach(() => {
       const mocks = [
@@ -181,17 +172,18 @@ describe("AddPatient", () => {
         },
       ];
       render(
-        <Provider store={store}>
-          <MockedProvider mocks={mocks} addTypename={false}>
-            <MemoryRouter initialEntries={["/add-patient/"]}>
-              <Route component={AddPatient} path={"/add-patient/"} />
-              <Route path={"/patients"} render={() => <p>Patients!</p>} />
-            </MemoryRouter>
-          </MockedProvider>
-        </Provider>
+        <MockedProvider mocks={mocks} addTypename={false}>
+          <MemoryRouter initialEntries={["/add-patient/"]}>
+            <Route component={AddPatient} path={"/add-patient/"} />
+            <Route path={"/patients"} render={() => <p>Patients!</p>} />
+          </MemoryRouter>
+        </MockedProvider>
       );
     });
     it("shows the form title", async () => {
+      await act(async () => {
+        await new Promise((resolve) => setTimeout(resolve, 500));
+      });
       expect(
         await screen.queryAllByText("Add New Person", { exact: false })[0]
       ).toBeInTheDocument();
@@ -244,6 +236,9 @@ describe("AddPatient", () => {
       });
       describe("Submitting Address Verification", () => {
         beforeEach(async () => {
+          await act(async () => {
+            await new Promise((resolve) => setTimeout(resolve, 500));
+          });
           const modal = screen.getByRole("dialog", {
             exact: false,
           });

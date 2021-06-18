@@ -50,13 +50,7 @@ export type AoEAnswers = Omit<
 interface Props {
   saveButtonText: string;
   onClose?: () => void;
-  patient: {
-    internalId: string;
-    gender: string;
-    testResultDelivery: string;
-    birthDate: string;
-    telephone: string;
-  };
+  patient: Patient;
   lastTest:
     | {
         dateTested: string;

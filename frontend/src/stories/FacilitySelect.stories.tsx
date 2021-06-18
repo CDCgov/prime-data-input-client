@@ -1,6 +1,4 @@
 import { Story, Meta } from "@storybook/react";
-import { Provider } from "react-redux";
-import createMockStore from "redux-mock-store";
 
 import FacilitySelect, {
   FacilitySelectProps,
@@ -12,26 +10,8 @@ export default {
   argTypes: { setActiveFacility: { action: "clicked" } },
 } as Meta;
 
-const mockStore = createMockStore([]);
-
-const store = mockStore({
-  organization: {
-    name: "Foo Organization",
-  },
-  user: {
-    firstName: "Kim",
-    lastName: "Mendoza",
-  },
-  facilities: [
-    { id: "1", name: "Facility 1" },
-    { id: "2", name: "Facility 2" },
-  ],
-});
-
 const Template = (): Story<FacilitySelectProps> => (args) => (
-  <Provider store={store}>
-    <FacilitySelect {...args} />
-  </Provider>
+  <FacilitySelect {...args} />
 );
 
 const createTestFacility = (name: string, id: string): Facility => ({

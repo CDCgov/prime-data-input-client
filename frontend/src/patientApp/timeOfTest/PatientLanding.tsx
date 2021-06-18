@@ -1,11 +1,11 @@
 import { FontAwesomeIcon } from "@fortawesome/react-fontawesome";
-import { connect, useSelector } from "react-redux";
 
 import { formatFullName } from "../../app/utils/user";
+import { usePatient } from "../../hooks/usePatient";
 
 const PatientLanding = () => {
-  const patient = useSelector((state) => (state as any).patient as any);
-  const fullName = formatFullName(patient);
+  const { patient } = usePatient();
+  const fullName = patient ? formatFullName(patient) : "";
 
   return (
     <main className="patient-app patient-app--landing padding-bottom-4 bg-base-lightest">
@@ -80,4 +80,4 @@ const PatientLanding = () => {
   );
 };
 
-export default connect()(PatientLanding);
+export default PatientLanding;

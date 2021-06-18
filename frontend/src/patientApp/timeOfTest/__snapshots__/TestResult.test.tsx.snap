@@ -65,7 +65,9 @@ exports[`TestResult should show a negative result 1`] = `
         </h2>
         <p
           class="margin-top-05"
-        />
+        >
+          Testing device
+        </p>
         <h2
           class="font-heading-sm"
         >
@@ -346,7 +348,9 @@ exports[`TestResult should show an inconclusive result 1`] = `
         </h2>
         <p
           class="margin-top-05"
-        />
+        >
+          Testing device
+        </p>
         <h2
           class="font-heading-sm"
         >

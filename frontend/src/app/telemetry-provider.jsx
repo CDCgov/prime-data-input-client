@@ -15,7 +15,7 @@ class TelemetryProvider extends Component {
   };
 
   componentDidMount() {
-    const { history } = this.props;
+    const { history, after } = this.props;
     const { initialized } = this.state;
     const AppInsightsInstrumentationKey = this.props.instrumentationKey; // PUT YOUR KEY HERE
     if (
@@ -26,8 +26,9 @@ class TelemetryProvider extends Component {
       ai.initialize(AppInsightsInstrumentationKey, history);
       this.setState({ initialized: true });
     }
-
-    this.props.after();
+    if (after) {
+      after();
+    }
   }
 
   render() {

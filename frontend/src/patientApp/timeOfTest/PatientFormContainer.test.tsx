@@ -1,13 +1,13 @@
 import renderer from "react-test-renderer";
 import { render, screen, cleanup } from "@testing-library/react";
 import { MockedProvider } from "@apollo/client/testing";
-import { Provider } from "react-redux";
-import configureStore from "redux-mock-store";
+
+import { appConfig, facilities, patient } from "../../storage/store";
+import { facilitySample, patientSample } from "../../config/constants";
 
 import PatientFormContainer from "./PatientFormContainer";
 
 jest.mock("../..//app/commonComponents/ComboBox", () => () => <></>);
-const mockStore = configureStore([]);
 
 jest.mock("react-router-dom", () => ({
   Prompt: (props: any) => <></>,
@@ -18,27 +18,21 @@ jest.mock("react-router-dom", () => ({
 }));
 
 describe("PatientFormContainer", () => {
+  beforeAll(() => {
+    appConfig({ ...appConfig(), plid: "foo" });
+    facilities({
+      selectedFacility: { ...facilitySample, id: "123", name: "Sample" },
+      availableFacilities: [{ ...facilitySample, id: "123", name: "Sample" }],
+    });
+    patient(patientSample);
+  });
   afterEach(cleanup);
 
   it("snapshot", () => {
-    const store = mockStore({
-      patient: {
-        residentCongregateSetting: true,
-        employedInHealthcare: true,
-        birthDate: "",
-      },
-      plid: "foo",
-      facility: {
-        id: "123",
-      },
-      facilities: [],
-    });
     const component = renderer.create(
-      <Provider store={store}>
-        <MockedProvider mocks={[]} addTypename={false}>
-          <PatientFormContainer />
-        </MockedProvider>
-      </Provider>
+      <MockedProvider mocks={[]} addTypename={false}>
+        <PatientFormContainer />
+      </MockedProvider>
     );
 
     expect(component.toJSON()).toMatchSnapshot();
@@ -47,24 +41,10 @@ describe("PatientFormContainer", () => {
     window.scrollTo = jest.fn();
 
     beforeEach(() => {
-      const store = mockStore({
-        patient: {
-          residentCongregateSetting: true,
-          employedInHealthcare: true,
-          birthDate: "",
-        },
-        plid: "foo",
-        facility: {
-          id: "123",
-        },
-        facilities: [],
-      });
       render(
-        <Provider store={store}>
-          <MockedProvider mocks={[]} addTypename={false}>
-            <PatientFormContainer />
-          </MockedProvider>
-        </Provider>
+        <MockedProvider mocks={[]} addTypename={false}>
+          <PatientFormContainer />
+        </MockedProvider>
       );
     });
     it("shows required field instruction once", () => {

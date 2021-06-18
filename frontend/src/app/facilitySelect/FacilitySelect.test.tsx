@@ -1,43 +1,35 @@
 import React from "react";
-import configureStore from "redux-mock-store";
 import renderer from "react-test-renderer";
-import { Provider } from "react-redux";
+
+import { appConfig } from "../../storage/store";
 
 import FacilitySelect from "./FacilitySelect";
-
-const mockStore = configureStore([]);
 
 describe("FacilitySelect", () => {
   let component: any;
   const mockSetActiveFacility = jest.fn();
 
   beforeEach(() => {
-    const store = mockStore({
-      organization: {
-        name: "Organization Name",
-      },
+    appConfig({
+      ...appConfig(),
+      organization: { name: "Organization Name" },
       user: {
+        ...appConfig().user,
         firstName: "Kim",
         lastName: "Mendoza",
       },
-      facilities: [
-        { id: "1", name: "Facility 1" },
-        { id: "2", name: "Facility 2" },
-      ],
     });
 
     component = renderer.create(
-      <Provider store={store}>
-        <FacilitySelect
-          facilities={
-            [
-              { id: "1", name: "Facility 1" },
-              { id: "2", name: "Facility 2" },
-            ] as any
-          }
-          setActiveFacility={mockSetActiveFacility}
-        />
-      </Provider>
+      <FacilitySelect
+        facilities={
+          [
+            { id: "1", name: "Facility 1" },
+            { id: "2", name: "Facility 2" },
+          ] as any
+        }
+        setActiveFacility={mockSetActiveFacility}
+      />
     );
   });
 

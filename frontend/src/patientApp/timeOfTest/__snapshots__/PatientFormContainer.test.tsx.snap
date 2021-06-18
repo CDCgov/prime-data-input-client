@@ -130,7 +130,7 @@ exports[`PatientFormContainer snapshot 1`] = `
                   onBlur={[Function]}
                   onChange={[Function]}
                   type="text"
-                  value=""
+                  value="Jhon"
                 />
               </div>
               <div
@@ -152,7 +152,7 @@ exports[`PatientFormContainer snapshot 1`] = `
                   onBlur={[Function]}
                   onChange={[Function]}
                   type="text"
-                  value=""
+                  value="Sample"
                 />
               </div>
               <div
@@ -174,7 +174,7 @@ exports[`PatientFormContainer snapshot 1`] = `
                   onBlur={[Function]}
                   onChange={[Function]}
                   type="text"
-                  value=""
+                  value="Doe"
                 />
               </div>
             </div>
@@ -196,7 +196,7 @@ exports[`PatientFormContainer snapshot 1`] = `
                   id="4"
                   name="role"
                   onChange={[Function]}
-                  value=""
+                  value="STAFF"
                 >
                   <option
                     value=""
@@ -258,7 +258,7 @@ exports[`PatientFormContainer snapshot 1`] = `
                   onBlur={[Function]}
                   onChange={[Function]}
                   type="date"
-                  value=""
+                  value={2020-02-02T00:00:00.000Z}
                 />
               </div>
             </div>
@@ -1053,7 +1053,7 @@ exports[`PatientFormContainer snapshot 1`] = `
                     className="usa-radio"
                   >
                     <input
-                      checked={false}
+                      checked={true}
                       className="usa-radio__input"
                       data-required="false"
                       disabled={false}
@@ -1101,7 +1101,7 @@ exports[`PatientFormContainer snapshot 1`] = `
                     className="usa-radio"
                   >
                     <input
-                      checked={false}
+                      checked={true}
                       className="usa-radio__input"
                       data-required="false"
                       disabled={false}
@@ -1181,7 +1181,7 @@ exports[`PatientFormContainer snapshot 1`] = `
                     className="usa-radio"
                   >
                     <input
-                      checked={false}
+                      checked={true}
                       className="usa-radio__input"
                       data-required="false"
                       disabled={false}

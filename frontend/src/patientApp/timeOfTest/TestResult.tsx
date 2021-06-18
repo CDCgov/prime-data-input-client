@@ -1,17 +1,20 @@
-import { useSelector } from "react-redux";
-
 import { formatFullName } from "../../app/utils/user";
-import { RootState } from "../../app/store";
-import { Patient } from "../../app/patients/ManagePatients";
 import { TestResult as TestResultType } from "../../app/testQueue/QueueItem";
 import { COVID_RESULTS, TEST_RESULT_DESCRIPTIONS } from "../../app/constants";
+import { usePatient } from "../../hooks/usePatient";
 
 const TestResult = () => {
-  const patient = useSelector<RootState, Patient>((state) => state.patient);
+  const { patient } = usePatient();
   const fullName = formatFullName(patient as any);
-  const dateTested = new Date(patient.lastTest.dateTested).toLocaleDateString();
-  const deviceType = patient.lastTest.deviceTypeModel;
 
+  const dateTested = patient?.lastTest?.dateTested
+    ? new Date(patient?.lastTest?.dateTested).toLocaleDateString()
+    : new Date().toLocaleDateString();
+
+  const deviceType = patient?.lastTest?.deviceTypeModel;
+  if (!patient) {
+    return <>Patient is not selected</>;
+  }
   return (
     <main className="patient-app padding-top-105 padding-bottom-4 bg-base-lightest">
       <div className="grid-container maxw-tablet">
@@ -23,7 +26,11 @@ const TestResult = () => {
             <div className="grid-col usa-prose">
               <h2 className="font-heading-sm">Test result</h2>
               <p className="margin-top-05">
-                {TEST_RESULT_DESCRIPTIONS[patient.lastTest.result]}
+                {
+                  TEST_RESULT_DESCRIPTIONS[
+                    patient.lastTest?.result as TestResultType
+                  ]
+                }
               </p>
             </div>
             <div className="grid-col usa-prose">
@@ -34,7 +41,7 @@ const TestResult = () => {
           <h2 className="font-heading-sm">Test device</h2>
           <p className="margin-top-05">{deviceType}</p>
           <h2 className="font-heading-sm">What does my result mean?</h2>
-          <TestResultNotes result={patient.lastTest.result} />
+          <TestResultNotes result={patient.lastTest?.result} />
           <p>
             For more information, please visit the{" "}
             <a href="https://www.cdc.gov/coronavirus/2019-ncov/if-you-are-sick/end-home-isolation.html">

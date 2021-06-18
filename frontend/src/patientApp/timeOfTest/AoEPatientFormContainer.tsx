@@ -1,12 +1,13 @@
 import React, { useEffect, useState } from "react";
 import { Redirect } from "react-router-dom";
-import { connect, useSelector } from "react-redux";
+import { toast } from "react-toastify";
 
 import AoEForm from "../../app/testQueue/AoEForm/AoEForm";
 import { showError } from "../../app/utils";
-import { getPatientLinkIdFromUrl } from "../../app/utils/url";
 import PatientTimeOfTestContainer from "../PatientTimeOfTestContainer";
 import { PxpApi } from "../PxpApiService";
+import { useAppConfig } from "../../hooks/useAppConfig";
+import { usePatient } from "../../hooks/usePatient";
 
 interface Props {
   page: string;
@@ -14,9 +15,10 @@ interface Props {
 
 const AoEPatientFormContainer: React.FC<Props> = ({ page }: Props) => {
   const [nextPage, setNextPage] = useState(false);
-  const patient = useSelector((state) => (state as any).patient as any);
-  const plid =
-    useSelector((state) => (state as any).plid) || getPatientLinkIdFromUrl();
+  const {
+    config: { plid },
+  } = useAppConfig();
+  const { patient } = usePatient();
 
   useEffect(() => {
     window.scrollTo(0, 0);
@@ -24,10 +26,16 @@ const AoEPatientFormContainer: React.FC<Props> = ({ page }: Props) => {
 
   const saveCallback = async (data: any) => {
     try {
-      await PxpApi.submitQuestions(plid as string, patient.birthDate, data);
-      setNextPage(true);
+      if (patient) {
+        await PxpApi.submitQuestions(
+          plid as string,
+          patient.birthDate.toString(),
+          data
+        );
+        setNextPage(true);
+      }
     } catch (e) {
-      showError("There was an error submitting your responses");
+      showError(toast, "There was an error submitting your responses");
       return;
     }
   };
@@ -41,6 +49,10 @@ const AoEPatientFormContainer: React.FC<Props> = ({ page }: Props) => {
         }}
       />
     );
+  }
+
+  if (!patient) {
+    return <>Patient is not selected</>;
   }
 
   return (
@@ -57,4 +69,4 @@ const AoEPatientFormContainer: React.FC<Props> = ({ page }: Props) => {
   );
 };
 
-export default connect()(AoEPatientFormContainer);
+export default AoEPatientFormContainer;

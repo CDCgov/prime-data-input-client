@@ -1,21 +1,19 @@
 import React from "react";
-import { useSelector } from "react-redux";
+import { useReactiveVar } from "@apollo/client";
 
 import { hasPermission, appPermissions } from "../permissions";
-import { RootState } from "../store";
 import { useDocumentTitle } from "../utils/hooks";
+import { appConfig, facilities } from "../../storage/store";
 
 import ManagePatients from "./ManagePatients";
 
 const ManagePatientsContainer = (props: { page?: number }) => {
   useDocumentTitle("People");
-  const activeFacilityId = useSelector(
-    (state) => (state as any).facility.id as string
-  );
-  const user = useSelector<RootState, User>((state) => state.user);
-  const isAdmin = useSelector<RootState, boolean>(
-    (state) => state.user.isAdmin
-  );
+  const { selectedFacility } = useReactiveVar<FacilitiesState>(facilities);
+  const { user } = useReactiveVar<AppConfigState>(appConfig);
+
+  const activeFacilityId = selectedFacility?.id;
+  const isAdmin = user.isAdmin;
 
   const canEditUser = hasPermission(
     user.permissions,
@@ -25,7 +23,7 @@ const ManagePatientsContainer = (props: { page?: number }) => {
     user.permissions,
     appPermissions.people.canDelete
   );
-  if (activeFacilityId.length < 1) {
+  if (!activeFacilityId) {
     return <div>"No facility selected"</div>;
   }
   return (

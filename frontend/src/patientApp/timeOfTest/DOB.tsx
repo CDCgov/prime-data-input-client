@@ -1,22 +1,26 @@
 import React, { FormEvent, useEffect, useState, useRef } from "react";
-import { connect, useDispatch, useSelector } from "react-redux";
 import { Redirect } from "react-router-dom";
 import moment from "moment";
 
 import Button from "../../app/commonComponents/Button/Button";
 import TextInput from "../../app/commonComponents/TextInput";
-import { setPatient, updateOrganization } from "../../app/store";
 import { PxpApi } from "../PxpApiService";
 import Alert from "../../app/commonComponents/Alert";
+import { usePatient } from "../../hooks/usePatient";
+import { useAppConfig } from "../../hooks/useAppConfig";
 
 const DOB = () => {
-  const dispatch = useDispatch();
   const [birthDate, setBirthDate] = useState("");
   const [birthDateError, setBirthDateError] = useState("");
   const [linkExpiredError, setLinkExpiredError] = useState(false);
   const dobRef = useRef<HTMLInputElement>(null);
-  const plid = useSelector((state: any) => state.plid);
-  const patient = useSelector((state: any) => state.patient);
+
+  const { patient, setCurrentPatient } = usePatient();
+  const {
+    config: { plid },
+    updateOrganizationName,
+  } = useAppConfig();
+
   const [loading, setLoading] = useState(false);
 
   useEffect(() => {
@@ -36,15 +40,11 @@ const DOB = () => {
     setLoading(true);
     try {
       const response = await PxpApi.validateDateOfBirth(
-        plid,
+        plid as string,
         date.format("YYYY-MM-DD")
       );
-      dispatch(
-        updateOrganization({
-          name: response.organizationName,
-        })
-      );
-      dispatch(setPatient(response));
+      updateOrganizationName(response.organizationName);
+      setCurrentPatient(response);
     } catch (error) {
       if (error?.status === 410) {
         setLinkExpiredError(true);
@@ -136,4 +136,4 @@ const DOB = () => {
   );
 };
 
-export default connect()(DOB);
+export default DOB;

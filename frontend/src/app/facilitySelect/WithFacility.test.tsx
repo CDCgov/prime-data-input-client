@@ -1,14 +1,13 @@
 import React from "react";
-import { Provider } from "react-redux";
 import renderer from "react-test-renderer";
-import configureStore from "redux-mock-store";
 
-import { updateFacility } from "../store";
+import { facilitySample } from "../../config/constants";
+import { appConfig, facilities } from "../../storage/store";
 
 import WithFacility from "./WithFacility";
 
-const mockStore = configureStore([]);
 const mockHistoryPush = jest.fn();
+
 jest.mock("react-router-dom", () => ({
   useHistory: () => ({
     push: mockHistoryPush,
@@ -16,31 +15,27 @@ jest.mock("react-router-dom", () => ({
 }));
 
 describe("WithFacility", () => {
-  let store: any;
   let component: any;
   beforeEach(() => {
     mockHistoryPush.mockClear();
+    renderer.act(() => {});
   });
 
   describe("With zero facilities", () => {
     beforeEach(() => {
-      store = mockStore({
-        dataLoaded: true,
-        organization: {
-          name: "Organization Name",
-        },
-        user: {
-          firstName: "Kim",
-          lastName: "Mendoza",
-        },
-        facilities: [],
+      renderer.act(() => {
+        appConfig({
+          ...appConfig(),
+          dataLoaded: true,
+          organization: { name: "Organization Name" },
+          user: {
+            ...appConfig().user,
+            firstName: "Kim",
+            lastName: "Mendoza",
+          },
+        });
+        component = renderer.create(<WithFacility>App</WithFacility>);
       });
-      store.dispatch = jest.fn();
-      component = renderer.create(
-        <Provider store={store}>
-          <WithFacility>App</WithFacility>
-        </Provider>
-      );
     });
 
     it("should notify user to contact an admin", () => {
@@ -50,38 +45,35 @@ describe("WithFacility", () => {
 
   describe("With one facility", () => {
     beforeEach(() => {
-      store = mockStore({
-        dataLoaded: true,
-        organization: {
-          name: "Organization Name",
-        },
-        user: {
-          firstName: "Kim",
-          lastName: "Mendoza",
-        },
-        facilities: [{ id: "1", name: "Facility 1" }],
+      renderer.act(() => {
+        appConfig({
+          ...appConfig(),
+          dataLoaded: false,
+          organization: { name: "Organization Name" },
+          user: {
+            ...appConfig().user,
+            firstName: "Kim",
+            lastName: "Mendoza",
+          },
+        });
+        facilities({
+          ...facilities(),
+          availableFacilities: [
+            { ...facilitySample, id: "1", name: "Facility 1" },
+          ],
+        });
+        component = renderer.create(<WithFacility>App</WithFacility>);
       });
-      store.dispatch = jest.fn();
-      component = renderer.create(
-        <Provider store={store}>
-          <WithFacility>App</WithFacility>
-        </Provider>
-      );
     });
 
     it("should render with a value", () => {
       expect(component.toJSON()).toMatchSnapshot();
     });
-    it("should select a facility once", () => {
-      expect(store.dispatch).toHaveBeenCalledTimes(1);
-    });
     it("should select the first facility", () => {
-      expect(store.dispatch).toHaveBeenCalledWith(
-        updateFacility({ id: "1", name: "Facility 1" })
-      );
+      expect(facilities().selectedFacility?.id).toEqual("1");
     });
-    it("should push history once", () => {
-      expect(mockHistoryPush).toHaveBeenCalledTimes(1);
+    it("should push history", () => {
+      expect(mockHistoryPush).toHaveBeenCalled();
     });
     it("should set the facility id search param", () => {
       expect(mockHistoryPush).toHaveBeenCalledWith({ search: "?facility=1" });
@@ -90,26 +82,28 @@ describe("WithFacility", () => {
 
   describe("With two facilities", () => {
     beforeEach(() => {
-      store = mockStore({
-        dataLoaded: true,
-        organization: {
-          name: "Organization Name",
-        },
-        user: {
-          firstName: "Kim",
-          lastName: "Mendoza",
-        },
-        facilities: [
-          { id: "1", name: "Facility 1" },
-          { id: "2", name: "Facility 2" },
-        ],
+      renderer.act(() => {
+        appConfig({
+          ...appConfig(),
+          dataLoaded: true,
+          organization: { name: "Organization Name" },
+          user: {
+            ...appConfig().user,
+            firstName: "Kim",
+            lastName: "Mendoza",
+          },
+        });
+        facilities({
+          ...facilities(),
+          selectedFacility: { id: "", name: "", ...facilitySample },
+          availableFacilities: [
+            { ...facilitySample, id: "1", name: "Facility 1" },
+            { ...facilitySample, id: "2", name: "Facility 2" },
+          ],
+        });
+
+        component = renderer.create(<WithFacility>App</WithFacility>);
       });
-      store.dispatch = jest.fn();
-      component = renderer.create(
-        <Provider store={store}>
-          <WithFacility>App</WithFacility>
-        </Provider>
-      );
     });
 
     it("should render with a value", () => {
@@ -122,13 +116,9 @@ describe("WithFacility", () => {
           component.root.findAllByType("button")[0].props.onClick();
         });
       });
-      it("should select a facility once", () => {
-        expect(store.dispatch).toHaveBeenCalledTimes(1);
-      });
+
       it("should select the first facility", () => {
-        expect(store.dispatch).toHaveBeenCalledWith(
-          updateFacility({ id: "1", name: "Facility 1" })
-        );
+        expect(facilities().selectedFacility?.id).toEqual("1");
       });
       it("should push history once", () => {
         expect(mockHistoryPush).toHaveBeenCalledTimes(1);

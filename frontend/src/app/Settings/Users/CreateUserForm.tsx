@@ -1,14 +1,13 @@
 import React, { useState } from "react";
 import { FontAwesomeIcon } from "@fortawesome/react-fontawesome";
-import { useSelector } from "react-redux";
 
 import Button from "../../commonComponents/Button/Button";
 import TextInput from "../../commonComponents/TextInput";
 import Dropdown from "../../commonComponents/Dropdown";
 import { Role } from "../../permissions";
-import { RootState } from "../../store";
+import { useFacilities } from "../../../hooks/useFacilities";
 
-import { SettingsUser, UserFacilitySetting } from "./ManageUsersContainer";
+import { SettingsUser } from "./ManageUsersContainer";
 import "./ManageUsers.scss";
 import UserFacilitiesSettingsForm from "./UserFacilitiesSettingsForm";
 import { UpdateUser } from "./ManageUsers";
@@ -40,9 +39,10 @@ const ROLE_OPTIONS: { value: Role; label: string }[] = [
 ];
 
 const CreateUserForm: React.FC<Props> = ({ onClose, onSubmit, isUpdating }) => {
-  const facilities = useSelector<RootState, UserFacilitySetting[]>(
-    (state) => state.facilities
-  );
+  const {
+    facilities: { availableFacilities },
+  } = useFacilities();
+
   const [newUser, updateNewUser] = useState(initialFormState);
   const onChange = (
     e: React.ChangeEvent<HTMLInputElement | HTMLSelectElement>
@@ -126,7 +126,7 @@ const CreateUserForm: React.FC<Props> = ({ onClose, onSubmit, isUpdating }) => {
       <UserFacilitiesSettingsForm
         activeUser={newUser}
         onUpdateUser={updateUser}
-        allFacilities={facilities}
+        allFacilities={availableFacilities}
         showRequired
       />
       <div className="border-top border-base-lighter margin-x-neg-205 margin-top-5 padding-top-205 text-right">
