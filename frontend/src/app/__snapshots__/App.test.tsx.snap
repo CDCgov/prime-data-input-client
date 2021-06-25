@@ -552,6 +552,100 @@ exports[`App Render main screen 1`] = `
 </div>
 `;
 
+exports[`App should show auth error UI 1`] = `
+Array [
+  <div
+    className="usa-banner"
+  >
+    <div
+      className="usa-accordion"
+    >
+      <header
+        className="usa-banner__header"
+      >
+        <div
+          className="usa-banner__inner"
+        >
+          <div
+            className="grid-col-auto"
+          >
+            <img
+              alt="U.S. flag"
+              className="usa-banner__header-flag"
+              src="us_flag_small.png"
+            />
+          </div>
+          <div
+            className="grid-col-fill tablet:grid-col-auto"
+          >
+            <p
+              className="usa-banner__header-text"
+            >
+              An official website of the United States government
+            </p>
+            <p
+              aria-hidden="true"
+              className="usa-banner__header-action"
+            >
+              Here’s how you know
+            </p>
+          </div>
+          <button
+            aria-controls="gov-banner"
+            aria-expanded={false}
+            className="usa-accordion__button usa-banner__button"
+            onClick={[Function]}
+          >
+            <span
+              className="usa-banner__button-text"
+            >
+              Here’s how you know
+            </span>
+          </button>
+        </div>
+      </header>
+    </div>
+  </div>,
+  <header
+    className="border-bottom border-base-lighter padding-y-1"
+  >
+    <div
+      className="grid-container"
+    >
+      <img
+        alt="{process.env.REACT_APP_TITLE}"
+        className="maxh-4"
+        src="simplereport-logo-color.svg"
+      />
+    </div>
+  </header>,
+  <main
+    className="usa-section"
+  >
+    <div
+      className="grid-container usa-prose"
+    >
+      <h1
+        className=""
+      >
+        You don't have the appropriate permissions to view this page
+      </h1>
+      <p>
+        If the problem continues, contact
+         
+        <a
+          href="mailto:support@simplereport.gov"
+        >
+          support@simplereport.gov
+        </a>
+         
+        for support.
+      </p>
+    </div>
+  </main>,
+]
+`;
+
 exports[`App should show error UI 1`] = `
 <p>
   Server connection error...

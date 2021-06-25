@@ -1,0 +1,94 @@
+// Jest Snapshot v1, https://goo.gl/fbAQLP
+
+exports[`AuthErrorPage displays the correct error message 1`] = `
+<div>
+  <div
+    class="usa-banner"
+  >
+    <div
+      class="usa-accordion"
+    >
+      <header
+        class="usa-banner__header"
+      >
+        <div
+          class="usa-banner__inner"
+        >
+          <div
+            class="grid-col-auto"
+          >
+            <img
+              alt="U.S. flag"
+              class="usa-banner__header-flag"
+              src="us_flag_small.png"
+            />
+          </div>
+          <div
+            class="grid-col-fill tablet:grid-col-auto"
+          >
+            <p
+              class="usa-banner__header-text"
+            >
+              An official website of the United States government
+            </p>
+            <p
+              aria-hidden="true"
+              class="usa-banner__header-action"
+            >
+              Here’s how you know
+            </p>
+          </div>
+          <button
+            aria-controls="gov-banner"
+            aria-expanded="false"
+            class="usa-accordion__button usa-banner__button"
+          >
+            <span
+              class="usa-banner__button-text"
+            >
+              Here’s how you know
+            </span>
+          </button>
+        </div>
+      </header>
+    </div>
+  </div>
+  <header
+    class="border-bottom border-base-lighter padding-y-1"
+  >
+    <div
+      class="grid-container"
+    >
+      <img
+        alt="{process.env.REACT_APP_TITLE}"
+        class="maxh-4"
+        src="simplereport-logo-color.svg"
+      />
+    </div>
+  </header>
+  <main
+    class="usa-section"
+  >
+    <div
+      class="grid-container usa-prose"
+    >
+      <h1
+        class=""
+      >
+        You don't have the appropriate permissions to view this page
+      </h1>
+      <p>
+        If the problem continues, contact
+         
+        <a
+          href="mailto:support@simplereport.gov"
+        >
+          support@simplereport.gov
+        </a>
+         
+        for support.
+      </p>
+    </div>
+  </main>
+</div>
+`;

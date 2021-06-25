@@ -63,15 +63,14 @@ const authMiddleware = new ApolloLink((operation, forward) => {
 });
 
 const logoutLink = onError(({ networkError, graphQLErrors }: ErrorResponse) => {
+  if (appInsights instanceof ApplicationInsights) {
+    appInsights.trackException({ error: networkError });
+  }
   if (networkError && process.env.REACT_APP_BASE_URL) {
     if ("statusCode" in networkError && networkError.statusCode === 401) {
+      networkError.message = "UNAUTHORIZED";
       console.warn("[UNATHORIZED_ACCESS] !!");
-      console.warn("redirect-to:", process.env.REACT_APP_BASE_URL);
-      window.location.replace(process.env.REACT_APP_BASE_URL);
     } else {
-      if (appInsights instanceof ApplicationInsights) {
-        appInsights.trackException({ error: networkError });
-      }
       showError(
         toast,
         "Please check for errors and try again",

@@ -30,6 +30,8 @@ services:
     environment:
       SPRING_PROFILES_ACTIVE: dev,db-dockerized
       SPRING_LIQUIBASE_ENABLED: "true"
+    volumes:
+      - ./src:/home/gradle/graphql-api/backend/src
     ports:
       # map SR_API_PORT on localhost to the API server in the container
       - "${SR_API_PORT:-8080}:8080"
