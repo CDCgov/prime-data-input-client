@@ -1,0 +1,33 @@
+.logo-container {
+  text-align: center;
+
+  &__image {
+    border-radius: 100%;
+    box-shadow: 0 0 0 0 rgba(52, 172, 224, 1);
+    animation: pulse 2s infinite;
+    margin-bottom: 1rem;
+    max-width: 80px;
+    max-height: 80px;
+  }
+
+  &__message {
+    font-weight: 700;
+  }
+}
+
+@keyframes pulse {
+  0% {
+    transform: scale(0.95);
+    box-shadow: 0 0 0 0 rgba(52, 172, 224, 0.7);
+  }
+
+  70% {
+    transform: scale(1);
+    box-shadow: 0 0 0 10px rgba(52, 172, 224, 0);
+  }
+
+  100% {
+    transform: scale(0.95);
+    box-shadow: 0 0 0 0 rgba(52, 172, 224, 0);
+  }
+}

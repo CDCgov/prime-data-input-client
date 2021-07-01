@@ -20,6 +20,7 @@ import WithFacility from "./facilitySelect/WithFacility";
 import { appPermissions } from "./permissions";
 import Settings from "./Settings/Settings";
 import { getAppInsights } from "./TelemetryService";
+import Loading from "./commonComponents/Loading";
 
 export const WHOAMI_QUERY = gql`
   query WhoAmI {
@@ -80,7 +81,7 @@ const App = () => {
   }, [data]);
 
   if (loading) {
-    return <p>Loading account information...</p>;
+    return <Loading message="Loading account information..." />;
   }
 
   if (error) {
