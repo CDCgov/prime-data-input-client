@@ -1,5 +1,5 @@
 spring:
-  profiles.include: no-security, no-okta-mgmt, create-sample-data, no-okta-auth, no-experian
+  profiles.include: no-security, no-okta-mgmt, create-sample-data, no-okta-auth
 simple-report:
   patient-link-url: https://training.simplereport.gov/app/pxp?plid=
   sendgrid:

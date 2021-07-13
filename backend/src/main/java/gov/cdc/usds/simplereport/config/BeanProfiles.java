@@ -15,8 +15,6 @@ public final class BeanProfiles {
   public static final String NO_OKTA_AUTH = "no-okta-auth";
   /** Profile for mocking and bypassing most security (TEST OR DEMO ONLY) */
   public static final String NO_SECURITY = "no-security";
-  /** Profile for mocking and bypassing Experian identity verification (TEST OR DEMO ONLY) */
-  public static final String NO_EXPERIAN = "no-experian";
   /** Profile for local development, sometimes also used for QA/Demo environments. */
   public static final String DEVELOPMENT = "dev";
   /** Profile that creates sample data on application startup. */

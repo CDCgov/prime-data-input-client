@@ -1,5 +1,5 @@
 spring:
-  profiles.include: no-security, no-okta-mgmt, server-debug, create-sample-data, local, no-okta-auth, no-experian
+  profiles.include: no-security, no-okta-mgmt, server-debug, create-sample-data, local, no-okta-auth
   liquibase:
     user: simple_report_migrations
     password: migrations456

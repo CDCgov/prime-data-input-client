@@ -35,6 +35,7 @@ import org.springframework.scheduling.annotation.EnableScheduling;
   SendGridProperties.class,
   OrderingProviderProperties.class,
   DynamicsProperties.class,
+  ExperianProperties.class,
   CorsProperties.class
 })
 @EnableAsync

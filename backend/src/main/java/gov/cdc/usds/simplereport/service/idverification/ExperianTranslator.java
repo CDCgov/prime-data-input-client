@@ -7,6 +7,7 @@ import gov.cdc.usds.simplereport.api.model.accountrequest.IdentityVerificationRe
 import java.time.LocalDate;
 import java.time.format.DateTimeFormatter;
 import java.time.format.DateTimeParseException;
+import org.apache.commons.codec.binary.Base64;
 import org.json.JSONObject;
 
 /** Helper class to translate Experian requests and responses used for identity verification. */
@@ -41,10 +42,11 @@ public class ExperianTranslator {
       IdentityVerificationRequest userData,
       String tenantId,
       String clientReferenceId) {
+    String b64Password = new String(Base64.encodeBase64(password.getBytes()));
     // Create payload (includes user details)
     JSONObject contactBody = createContact(userData);
     JSONObject controlBody =
-        new JSONObject(String.format(INITIAL_REQUEST_CONTROL, username, password));
+        new JSONObject(String.format(INITIAL_REQUEST_CONTROL, username, b64Password));
     JSONObject applicationBody = new JSONObject(INITIAL_REQUEST_APPLICATION);
     JSONObject payload = new JSONObject();
     payload.put("control", controlBody.get("control"));

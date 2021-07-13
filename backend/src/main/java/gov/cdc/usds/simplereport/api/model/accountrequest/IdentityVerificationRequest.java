@@ -1,12 +1,13 @@
 package gov.cdc.usds.simplereport.api.model.accountrequest;
 
 import com.fasterxml.jackson.annotation.JsonProperty;
+import com.fasterxml.jackson.databind.PropertyNamingStrategy;
+import com.fasterxml.jackson.databind.annotation.JsonNaming;
 import javax.validation.constraints.NotNull;
 import lombok.Getter;
-import lombok.Setter;
 
 @Getter
-@Setter
+@JsonNaming(PropertyNamingStrategy.KebabCaseStrategy.class)
 public class IdentityVerificationRequest {
   @JsonProperty @NotNull private String firstName;
   @JsonProperty @NotNull private String lastName;
