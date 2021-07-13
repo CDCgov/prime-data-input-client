@@ -4,8 +4,10 @@ import static gov.cdc.usds.simplereport.service.idverification.ExperianTranslato
 import static org.assertj.core.api.Assertions.assertThat;
 import static org.junit.jupiter.api.Assertions.assertThrows;
 
+import com.fasterxml.jackson.core.JsonProcessingException;
+import com.fasterxml.jackson.databind.JsonNode;
+import com.fasterxml.jackson.databind.node.ObjectNode;
 import gov.cdc.usds.simplereport.api.model.accountrequest.IdentityVerificationRequest;
-import org.json.JSONArray;
 import org.json.JSONObject;
 import org.junit.jupiter.api.Test;
 
@@ -27,53 +29,48 @@ class ExperianTranslatorTest {
   @Test
   void requestBody_worksWithValidInput() throws Exception {
     IdentityVerificationRequest userData = createValidUserData();
-    String requestBody = createRequest(userData);
+    ObjectNode requestBody = createRequest(userData);
 
-    JSONObject requestJson = new JSONObject(requestBody);
-    assertThat(requestJson.has("payload")).isTrue();
-    assertThat(requestJson.has("header")).isTrue();
+    //    JSONObject requestJson = new JSONObject(requestBody);
+    assertThat(requestBody.has("payload")).isTrue();
+    assertThat(requestBody.has("header")).isTrue();
 
-    JSONObject payloadBody = requestJson.getJSONObject("payload");
+    JsonNode payloadBody = requestBody.get("payload");
     assertThat(payloadBody.has("control")).isTrue();
     assertThat(payloadBody.has("contacts")).isTrue();
 
-    JSONArray contactArray = payloadBody.getJSONArray("contacts");
-    assertThat(contactArray.length()).isEqualTo(1);
+    JsonNode contactArray = payloadBody.get("contacts");
+    assertThat(contactArray.size()).isEqualTo(1);
 
-    JSONObject firstEntry = contactArray.getJSONObject(0);
-    JSONObject person = firstEntry.getJSONObject("person");
+    JsonNode firstEntry = contactArray.get(0);
+    JsonNode person = firstEntry.get("person");
     // names are as expected
-    assertThat(person.getJSONArray("names").getJSONObject(0).getString("firstName"))
-        .isEqualTo(FIRST_NAME);
-    assertThat(person.getJSONArray("names").getJSONObject(0).getString("surName"))
-        .isEqualTo(LAST_NAME);
-    assertThat(person.getJSONArray("names").getJSONObject(0).getString("middleNames"))
-        .isEqualTo(MIDDLE_NAME);
+    assertThat(person.at("/names/0/firstName").asText()).isEqualTo(FIRST_NAME);
+    assertThat(person.at("/names/0/surName").asText()).isEqualTo(LAST_NAME);
+    assertThat(person.at("/names/0/middleNames").asText()).isEqualTo(MIDDLE_NAME);
 
     // dob matches
-    assertThat(person.getJSONObject("personDetails").getString("dateOfBirth")).isEqualTo(DOB);
+    assertThat(person.at("/personDetails/dateOfBirth").asText()).isEqualTo(DOB);
 
     // contact information matches
-    JSONObject address = firstEntry.getJSONArray("addresses").getJSONObject(0);
-    assertThat(address.getString("street")).isEqualTo(STREET_ADDRESS);
-    assertThat(address.getString("postTown")).isEqualTo(CITY);
-    assertThat(address.getString("postal")).isEqualTo(ZIP_CODE);
-    assertThat(address.getString("stateProvinceCode")).isEqualTo(STATE);
+    JsonNode address = firstEntry.at("/addresses/0");
+    assertThat(address.get("street").asText()).isEqualTo(STREET_ADDRESS);
+    assertThat(address.get("postTown").asText()).isEqualTo(CITY);
+    assertThat(address.get("postal").asText()).isEqualTo(ZIP_CODE);
+    assertThat(address.get("stateProvinceCode").asText()).isEqualTo(STATE);
 
     // email matches
-    assertThat(firstEntry.getJSONArray("emails").getJSONObject(0).getString("email"))
-        .isEqualTo(EMAIL);
+    assertThat(firstEntry.at("/emails/0/email").asText()).isEqualTo(EMAIL);
 
     // phone number matches
-    assertThat(firstEntry.getJSONArray("telephones").getJSONObject(0).getString("number"))
-        .isEqualTo(PHONE);
+    assertThat(firstEntry.at("/telephones/0/number").asText()).isEqualTo(PHONE);
   }
 
   void createRequest_successfulWithoutOptionalFields() throws Exception {
     IdentityVerificationRequest userData = createValidUserData();
     userData.setMiddleName(null);
 
-    String requestBody = createRequest(userData);
+    ObjectNode requestBody = createRequest(userData);
 
     JSONObject requestJson = new JSONObject(requestBody);
     assertThat(requestJson.has("payload")).isTrue();
@@ -148,8 +145,9 @@ class ExperianTranslatorTest {
     return request;
   }
 
-  private String createRequest(IdentityVerificationRequest userData) {
+  private ObjectNode createRequest(IdentityVerificationRequest userData)
+      throws JsonProcessingException {
     return createInitialRequestBody(
-        "username", "password", userData, "tenantId", "clientReferenceId");
+        "subscriberSubcode", "username", "password", "tenantId", "clientReferenceId", userData);
   }
 }

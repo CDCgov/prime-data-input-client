@@ -2,6 +2,7 @@ package gov.cdc.usds.simplereport.api.accountrequest;
 
 import static gov.cdc.usds.simplereport.config.WebConfiguration.IDENTITY_VERIFICATION;
 
+import com.fasterxml.jackson.databind.JsonNode;
 import gov.cdc.usds.simplereport.api.model.accountrequest.IdentityVerificationRequest;
 import gov.cdc.usds.simplereport.service.idverification.ExperianService;
 import javax.annotation.PostConstruct;
@@ -28,7 +29,7 @@ public class IdentityVerificationController {
   }
 
   @PostMapping("/get-questions")
-  public String getQuestions(
+  public JsonNode getQuestions(
       HttpServletRequest request, @RequestBody IdentityVerificationRequest requestBody) {
     return _experianService.getQuestions(requestBody);
   }

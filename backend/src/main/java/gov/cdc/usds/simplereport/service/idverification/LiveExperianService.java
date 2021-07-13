@@ -4,11 +4,11 @@ import static gov.cdc.usds.simplereport.service.idverification.ExperianTranslato
 
 import com.fasterxml.jackson.core.JsonProcessingException;
 import com.fasterxml.jackson.databind.JsonNode;
-import com.fasterxml.jackson.databind.ObjectMapper;
+import com.fasterxml.jackson.databind.node.JsonNodeFactory;
+import com.fasterxml.jackson.databind.node.ObjectNode;
 import gov.cdc.usds.simplereport.api.model.accountrequest.IdentityVerificationRequest;
 import gov.cdc.usds.simplereport.properties.ExperianProperties;
 import java.util.UUID;
-import org.json.JSONObject;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.boot.autoconfigure.condition.ConditionalOnProperty;
 import org.springframework.http.HttpEntity;
@@ -23,13 +23,11 @@ import org.springframework.web.client.RestTemplate;
 public class LiveExperianService implements ExperianService {
 
   private final ExperianProperties _experianProperties;
-  private final ObjectMapper _objectMapper;
   private RestTemplate _restTemplate;
 
   @Autowired
   public LiveExperianService(final ExperianProperties experianProperties) {
     _experianProperties = experianProperties;
-    _objectMapper = new ObjectMapper();
     _restTemplate = new RestTemplate();
   }
 
@@ -40,65 +38,49 @@ public class LiveExperianService implements ExperianService {
     headers.add("X-Correlation-Id", guid);
     headers.add("X-User-Domain", _experianProperties.getDomain());
 
-    JSONObject requestBody = new JSONObject();
+    final JsonNodeFactory factory = JsonNodeFactory.instance;
+    ObjectNode requestBody = factory.objectNode();
     requestBody.put("username", _experianProperties.getCrosscoreUsername());
     requestBody.put("password", _experianProperties.getCrosscorePassword());
     requestBody.put("client_id", _experianProperties.getClientId());
     requestBody.put("client_secret", _experianProperties.getClientSecret());
-    HttpEntity<String> entity = new HttpEntity<>(requestBody.toString(), headers);
+
+    HttpEntity<ObjectNode> entity = new HttpEntity<>(requestBody, headers);
     try {
-      String responseEntityStr =
-          _restTemplate.postForObject(_experianProperties.getTokenEndpoint(), entity, String.class);
-      JsonNode responseRoot = _objectMapper.readTree(responseEntityStr);
-      return responseRoot.path("access_token").asText();
-    } catch (RestClientException | NullPointerException | JsonProcessingException e) {
+      ObjectNode responseObject =
+          _restTemplate.postForObject(
+              _experianProperties.getTokenEndpoint(), entity, ObjectNode.class);
+      return responseObject.path("access_token").asText();
+    } catch (RestClientException | NullPointerException e) {
       throw new IllegalArgumentException("The activation token could not be retrieved: ", e);
     }
   }
 
-  public String getQuestions(IdentityVerificationRequest userData) {
-    String initialRequestBody =
-        createInitialRequestBody(
-            _experianProperties.getPreciseidUsername(),
-            _experianProperties.getPreciseidPassword(),
-            userData,
-            _experianProperties.getPreciseidTenantId(),
-            _experianProperties.getPreciseidClientReferenceId());
-    HttpHeaders headers = new HttpHeaders();
-    headers.setContentType(MediaType.APPLICATION_JSON);
-    headers.setBearerAuth(fetchToken());
-    HttpEntity<String> entity = new HttpEntity<>(initialRequestBody, headers);
+  public JsonNode getQuestions(IdentityVerificationRequest userData) {
     try {
-      String responseEntityStr =
+      ObjectNode initialRequestBody =
+          createInitialRequestBody(
+              _experianProperties.getCrosscoreSubscriberSubcode(),
+              _experianProperties.getPreciseidUsername(),
+              _experianProperties.getPreciseidPassword(),
+              _experianProperties.getPreciseidTenantId(),
+              _experianProperties.getPreciseidClientReferenceId(),
+              userData);
+      HttpHeaders headers = new HttpHeaders();
+      headers.setContentType(MediaType.APPLICATION_JSON);
+      headers.setBearerAuth(fetchToken());
+      HttpEntity<ObjectNode> entity = new HttpEntity<>(initialRequestBody, headers);
+      ObjectNode responseEntity =
           _restTemplate.postForObject(
-              _experianProperties.getInitialRequestEndpoint(), entity, String.class);
-      JsonNode responseRoot = _objectMapper.readTree(responseEntityStr);
-      JsonNode questions =
-          responseRoot.path(
-              "clientResponsePayload.decisionElements[0].otherData.json.fraudSolutions.response.products.preciseIDServer.kba.questionSet");
-      return questions.asText();
-      //      return "{\"questionSet\":[{\"questionType\":28,\"questionText\":\"Please select the
-      // model year of the vehicle you purchased or leased prior to January 2011
-      // .\",\"questionSelect\":{\"questionChoice\":[\"2002\",\"2003\",\"2004\",\"2005\",\"NONE OF
-      // THE ABOVE/DOES NOT APPLY\"]}},{\"questionType\":24,\"questionText\":\"Which of the
-      // following professions do you currently or have If there is not a matched profession, please
-      // select 'NONE OF THE ABOVE'.\",\"questionSelect\":{\"questionChoice\":[\"DENTIST / DENTAL
-      // HYGIENIST\",\"SOCIAL WORKER\",\"OPTICIAN / OPTOMETRIST\",\"ELECTRICIAN\",\"NONE OF THE
-      // ABOVE/DOES NOT APPLY\"]}},{\"questionType\":41,\"questionText\":\"Please select the number
-      // of bedrooms in your home from the following choices. If the number of bedrooms in your home
-      // is not one of the choices please select 'NONE OF THE
-      // ABOVE'.\",\"questionSelect\":{\"questionChoice\":[\"2\",\"3\",\"4\",\"5\",\"NONE OF THE
-      // ABOVE/DOES NOT APPLY\"]}},{\"questionType\":47,\"questionText\":\"According to your credit
-      // profile, you may have opened a Home type loan in or around May 2015. Please select the
-      // lender to whom you currently made your
-      // payments.\",\"questionSelect\":{\"questionChoice\":[\"UC LENDING\",\"CTX MORTGAGE\",\"MID
-      // AMERICA MORTGAGE\",\"1ST NATIONWIDE MTG\",\"NONE OF THE ABOVE/DOES NOT
-      // APPLY\"]}},{\"questionType\":49,\"questionText\":\"According to our records, you graduated
-      // from which of the following High
-      // Schools?\",\"questionSelect\":{\"questionChoice\":[\"BAXTER SPRINGS HIGH SCHOOL\",\"BELLS
-      // HIGH SCHOOL\",\"LOCKNEY HIGH SCHOOL\",\"AGUA DULCE HIGH SCHOOL\",\"NONE OF THE ABOVE/DOES
-      // NOT APPLY\"]}}]}";
-      // next steps: unwrap the response and get the real questions
+              _experianProperties.getInitialRequestEndpoint(), entity, ObjectNode.class);
+      JsonNode questionsDataNode =
+          responseEntity.at(
+              "/clientResponsePayload/decisionElements/0/otherData/json/fraudSolutions/response/products/preciseIDServer/kba/questionSet");
+
+      final JsonNodeFactory factory = JsonNodeFactory.instance;
+      ObjectNode questionsResponse = factory.objectNode();
+      questionsResponse.set("questionSet", questionsDataNode);
+      return questionsResponse;
     } catch (RestClientException | NullPointerException | JsonProcessingException e) {
       throw new IllegalStateException("Questions could not be retrieved from Experian: ", e);
     }

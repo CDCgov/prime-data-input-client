@@ -48,7 +48,7 @@ class IdentityVerificationControllerTest {
   @MockBean private CurrentTenantDataAccessContextHolder _mockContextHolder;
 
   private static final String VALID_GET_QUESTIONS_REQUEST =
-      "{\"firstName\":\"Jane\", \"lastName\":\"Doe\", \"dateOfBirth\":\"1980-08-12\", \"email\":\"jane@example.com\", \"phoneNumber\":\"410-867-5309\", \"streetAddress1\":\"1600 Pennsylvania Ave\", \"city\":\"Washington\", \"state\":\"DC\", \"zip\":\"20500\"}";
+      "{\"first-name\":\"Jane\", \"last-name\":\"Doe\", \"date-of-birth\":\"1980-08-12\", \"email\":\"jane@example.com\", \"phone-number\":\"410-867-5309\", \"street-address1\":\"1600 Pennsylvania Ave\", \"city\":\"Washington\", \"state\":\"DC\", \"zip\":\"20500\"}";
 
   @BeforeEach
   public void setup() throws Exception {
