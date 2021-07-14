@@ -6,8 +6,10 @@ import com.fasterxml.jackson.databind.annotation.JsonNaming;
 import java.util.List;
 import javax.validation.constraints.NotNull;
 import lombok.Getter;
+import lombok.Setter;
 
 @Getter
+@Setter
 @JsonNaming(PropertyNamingStrategy.KebabCaseStrategy.class)
 public class IdentityVerificationAnswersRequest {
   @JsonProperty @NotNull private String sessionId;

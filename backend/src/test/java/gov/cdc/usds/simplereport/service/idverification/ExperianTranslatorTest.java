@@ -1,14 +1,19 @@
 package gov.cdc.usds.simplereport.service.idverification;
 
 import static gov.cdc.usds.simplereport.service.idverification.ExperianTranslator.createInitialRequestBody;
+import static gov.cdc.usds.simplereport.service.idverification.ExperianTranslator.createSubmitAnswersRequestBody;
 import static org.assertj.core.api.Assertions.assertThat;
+import static org.junit.jupiter.api.Assertions.assertEquals;
 import static org.junit.jupiter.api.Assertions.assertThrows;
+import static org.junit.jupiter.api.Assertions.assertTrue;
 
 import com.fasterxml.jackson.core.JsonProcessingException;
 import com.fasterxml.jackson.databind.JsonNode;
 import com.fasterxml.jackson.databind.node.ObjectNode;
+import gov.cdc.usds.simplereport.api.model.accountrequest.IdentityVerificationAnswersRequest;
 import gov.cdc.usds.simplereport.api.model.accountrequest.IdentityVerificationRequest;
-import org.json.JSONObject;
+import java.util.Arrays;
+import java.util.List;
 import org.junit.jupiter.api.Test;
 
 class ExperianTranslatorTest {
@@ -24,108 +29,140 @@ class ExperianTranslatorTest {
   private static final String STATE = "DC";
   private static final String ZIP_CODE = "20500";
 
+  private static final String SESSION_UUID = "1a6fe862-1661-47a9-a94c-d0fb3f2b9ecf";
+  private static final List<Integer> CORRECT_RESPONSES = Arrays.asList(1, 4, 2, 1);
+
   // positive tests
 
   @Test
-  void requestBody_worksWithValidInput() throws Exception {
+  void createInitialRequestBody_worksWithValidInput() throws Exception {
     IdentityVerificationRequest userData = createValidUserData();
-    ObjectNode requestBody = createRequest(userData);
+    ObjectNode requestBody = initialRequestHelper(userData);
 
-    //    JSONObject requestJson = new JSONObject(requestBody);
-    assertThat(requestBody.has("payload")).isTrue();
-    assertThat(requestBody.has("header")).isTrue();
+    assertTrue(requestBody.has("payload"));
+    assertTrue(requestBody.has("header"));
 
     JsonNode payloadBody = requestBody.get("payload");
-    assertThat(payloadBody.has("control")).isTrue();
-    assertThat(payloadBody.has("contacts")).isTrue();
+    assertTrue(payloadBody.has("control"));
+    assertTrue(payloadBody.has("contacts"));
 
     JsonNode contactArray = payloadBody.get("contacts");
-    assertThat(contactArray.size()).isEqualTo(1);
+    assertEquals(1, contactArray.size());
 
     JsonNode firstEntry = contactArray.get(0);
     JsonNode person = firstEntry.get("person");
     // names are as expected
-    assertThat(person.at("/names/0/firstName").asText()).isEqualTo(FIRST_NAME);
-    assertThat(person.at("/names/0/surName").asText()).isEqualTo(LAST_NAME);
-    assertThat(person.at("/names/0/middleNames").asText()).isEqualTo(MIDDLE_NAME);
+    assertEquals(FIRST_NAME, person.at("/names/0/firstName").asText());
+    assertEquals(LAST_NAME, person.at("/names/0/surName").asText());
+    assertEquals(MIDDLE_NAME, person.at("/names/0/middleNames").asText());
 
     // dob matches
-    assertThat(person.at("/personDetails/dateOfBirth").asText()).isEqualTo(DOB);
+    assertEquals(DOB, person.at("/personDetails/dateOfBirth").asText());
 
     // contact information matches
     JsonNode address = firstEntry.at("/addresses/0");
-    assertThat(address.get("street").asText()).isEqualTo(STREET_ADDRESS);
-    assertThat(address.get("postTown").asText()).isEqualTo(CITY);
-    assertThat(address.get("postal").asText()).isEqualTo(ZIP_CODE);
-    assertThat(address.get("stateProvinceCode").asText()).isEqualTo(STATE);
+    assertEquals(STREET_ADDRESS, address.get("street").asText());
+    assertEquals(CITY, address.get("postTown").asText());
+    assertEquals(ZIP_CODE, address.get("postal").asText());
+    assertEquals(STATE, address.get("stateProvinceCode").asText());
 
     // email matches
-    assertThat(firstEntry.at("/emails/0/email").asText()).isEqualTo(EMAIL);
+    assertEquals(EMAIL, firstEntry.at("/emails/0/email").asText());
 
     // phone number matches
-    assertThat(firstEntry.at("/telephones/0/number").asText()).isEqualTo(PHONE);
+    assertEquals(PHONE, firstEntry.at("/telephones/0/number").asText());
   }
 
-  void createRequest_successfulWithoutOptionalFields() throws Exception {
+  @Test
+  void createInitialRequestBody_successfulWithoutOptionalFields() throws Exception {
     IdentityVerificationRequest userData = createValidUserData();
     userData.setMiddleName(null);
 
-    ObjectNode requestBody = createRequest(userData);
+    ObjectNode requestBody = initialRequestHelper(userData);
 
-    JSONObject requestJson = new JSONObject(requestBody);
-    assertThat(requestJson.has("payload")).isTrue();
+    assertTrue(requestBody.has("payload"));
     // other names still present
-    assertThat(
-            requestJson
-                .getJSONObject("payload")
-                .getJSONArray("contacts")
-                .getJSONObject(0)
-                .getJSONObject("person")
-                .getJSONArray("names")
-                .getJSONObject(0)
-                .getString("firstName"))
-        .isEqualTo(FIRST_NAME);
+    assertEquals(
+        FIRST_NAME, requestBody.at("/payload/contacts/0/person/names/0/firstName").asText());
   }
 
   // negative tests
 
   @Test
-  void createRequest_failsWithoutRequiredData() {
+  void createInitialRequestBody_failsWithoutRequiredData() {
     IdentityVerificationRequest userData = createValidUserData();
     userData.setFirstName(null);
     Exception exception =
         assertThrows(
             IllegalArgumentException.class,
             () -> {
-              createRequest(userData);
+              initialRequestHelper(userData);
             });
     assertThat(exception).hasMessageContaining("String is required and cannot be empty.");
   }
 
   @Test
-  void createRequest_failsWithInvalidDate() {
+  void createInitialRequestBody_failsWithInvalidDate() {
     IdentityVerificationRequest userData = createValidUserData();
     userData.setDateOfBirth("180-12-03");
     Exception exception =
         assertThrows(
             IllegalArgumentException.class,
             () -> {
-              createRequest(userData);
+              initialRequestHelper(userData);
             });
     assertThat(exception).hasMessageContaining("Date was not properly formatted");
   }
 
   @Test
-  void createRequest_failsWithInvalidDateFormat() {
+  void createInitialRequestBody_failsWithInvalidDateFormat() {
     IdentityVerificationRequest userData = createValidUserData();
     userData.setDateOfBirth("1980/12/12");
     Exception exception =
         assertThrows(
             IllegalArgumentException.class,
             () -> {
-              createRequest(userData);
+              initialRequestHelper(userData);
             });
     assertThat(exception).hasMessageContaining("Date was not properly formatted");
+  }
+
+  @Test
+  void createSubmitAnswersRequestBody_worksWithValidInput() throws JsonProcessingException {
+    IdentityVerificationAnswersRequest answersRequest = createValidAnswersRequest();
+    ObjectNode requestBody = finalRequestHelper(answersRequest);
+
+    assertTrue(requestBody.has("payload"));
+    assertTrue(requestBody.has("header"));
+
+    JsonNode payloadBody = requestBody.get("payload");
+    assertTrue(payloadBody.has("control"));
+    assertTrue(payloadBody.has("kba"));
+
+    JsonNode kbaNode = payloadBody.get("kba");
+    assertEquals(SESSION_UUID, kbaNode.get("sessionId").asText());
+    assertEquals("4", kbaNode.get("outWalletQuestionsRequest").asText());
+
+    JsonNode answersNode = kbaNode.get("answers");
+    assertEquals(4, answersNode.size());
+    for (int i = 0; i < 4; i++) {
+      assertEquals(
+          String.valueOf(CORRECT_RESPONSES.get(i)),
+          answersNode.get("outWalletAnswer" + (i + 1)).asText());
+    }
+  }
+
+  @Test
+  void createSubmitAnswersRequestBody_failsWithMissingUuid() throws JsonProcessingException {
+    IdentityVerificationAnswersRequest answersRequest = createValidAnswersRequest();
+    answersRequest.setSessionId("");
+    Exception exception =
+        assertThrows(
+            IllegalArgumentException.class,
+            () -> {
+              finalRequestHelper(answersRequest);
+            });
+    assertThat(exception).hasMessageContaining("String is required and cannot be empty.");
   }
 
   // helpers
@@ -145,9 +182,27 @@ class ExperianTranslatorTest {
     return request;
   }
 
-  private ObjectNode createRequest(IdentityVerificationRequest userData)
+  private ObjectNode initialRequestHelper(IdentityVerificationRequest userData)
       throws JsonProcessingException {
     return createInitialRequestBody(
         "subscriberSubcode", "username", "password", "tenantId", "clientReferenceId", userData);
+  }
+
+  private IdentityVerificationAnswersRequest createValidAnswersRequest() {
+    IdentityVerificationAnswersRequest request = new IdentityVerificationAnswersRequest();
+    request.setSessionId(SESSION_UUID);
+    request.setAnswers(CORRECT_RESPONSES);
+    return request;
+  }
+
+  private ObjectNode finalRequestHelper(IdentityVerificationAnswersRequest answersRequest)
+      throws JsonProcessingException {
+    return createSubmitAnswersRequestBody(
+        "subscriberSubcode",
+        "username",
+        "password",
+        "tenantId",
+        "clientReferenceId",
+        answersRequest);
   }
 }

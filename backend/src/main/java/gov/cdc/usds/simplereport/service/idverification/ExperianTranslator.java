@@ -70,7 +70,8 @@ public class ExperianTranslator {
   }
 
   /**
-   * Using user-provided data, create the body of an initial Experian request.
+   * Using user-provided data, create the body of a final Experian request, this request is
+   * submitted to Experian to determine id verification status.
    *
    * @param subscriberSubcode SimpleReport's Experian subscriber subcode
    * @param username SimpleReport's username to access Experian
