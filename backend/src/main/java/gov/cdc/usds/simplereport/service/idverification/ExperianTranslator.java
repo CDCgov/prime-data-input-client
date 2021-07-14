@@ -28,7 +28,7 @@ public class ExperianTranslator {
   private static final ObjectMapper _objectMapper = new ObjectMapper();
 
   public static final String INITIAL_REQUEST_CONTACTS =
-      "[{\"id\":\"APPLICANT_CONTACT_ID_1\",\"person\":{\"typeOfPerson\":\"\",\"personIdentifier\":\"\",\"personDetails\":{\"dateOfBirth\":\"%s\",\"yearOfBirth\":\"\",\"age\":\"\",\"gender\":\"\",\"noOfDependents\":\"\",\"occupancyStatus\":\"\",\"mothersMaidenName\":\"\",\"spouseName\":\"\"},\"names\":[{\"id\":\"\",\"firstName\":\"%s\",\"middleNames\":\"%s\",\"surName\":\"%s\",\"nameSuffix\":\"\"}]},\"addresses\":[{\"id\":\"Main_Contact_Address_0\",\"addressType\":\"CURRENT\",\"poBoxNumber\":\"%s\",\"street\":\"%s\",\"street2\":\"%s\",\"postTown\":\"%s\",\"postal\":\"%s\",\"stateProvinceCode\":\"%s\"}],\"telephones\":[{\"id\":\"Main_Phone_0\",\"number\":\"%s\"}],\"emails\":[{\"id\":\"MAIN_EMAIL_0\",\"type\":\"\",\"email\":\"%s\"}]}]";
+      "[{\"id\":\"APPLICANT_CONTACT_ID_1\",\"person\":{\"typeOfPerson\":\"\",\"personIdentifier\":\"\",\"personDetails\":{},\"names\":[{}]},\"addresses\":[{\"id\":\"Main_Contact_Address_0\",\"addressType\":\"CURRENT\"}],\"telephones\":[{\"id\":\"Main_Phone_0\"}],\"emails\":[{\"id\":\"MAIN_EMAIL_0\"}]}]";
 
   public static final String INITIAL_REQUEST_CONTROL =
       "[{\"option\":\"PIDXML_VERSION\",\"value\":\"06.00\"},{\"option\":\"SUBSCRIBER_PREAMBLE\",\"value\":\"TBD3\"},{\"option\":\"SUBSCRIBER_OPERATOR_INITIAL\",\"value\":\"CD\"},{\"option\":\"SUBSCRIBER_SUB_CODE\",\"value\":\"%s\"},{\"option\":\"PID_USERNAME\",\"value\":\"%s\"},{\"option\":\"PID_PASSWORD\",\"value\":\"%s\"},{\"option\":\"VERBOSE\",\"value\":\"Y\"},{\"option\":\"PRODUCT_OPTION\",\"value\":\"24\"},{\"option\":\"DETAIL_REQUEST\",\"value\":\"D\"},{\"option\":\"VENDOR\",\"value\":\"123\"},{\"option\":\"VENDOR_VERSION\",\"value\":\"11\"},{\"option\":\"BROKER_NUMBER\",\"value\":\"\"},{\"option\":\"END_USER\",\"value\":\"\"},{\"option\":\"FREEZE_KEY_PIN\",\"value\":\"\"}]";
@@ -116,22 +116,31 @@ public class ExperianTranslator {
     String postal = parseString(userData.getZip());
     String poBoxNumber = parseOptionalString(userData.getPoBoxNumber());
 
-    return _objectMapper.readValue(
-        String.format(
-            INITIAL_REQUEST_CONTACTS,
-            dob,
-            firstName,
-            middleName,
-            lastName,
-            poBoxNumber,
-            street,
-            street2,
-            postTown,
-            postal,
-            stateCode,
-            phone,
-            email),
-        ArrayNode.class);
+    JsonNode contactNode = _objectMapper.readValue(INITIAL_REQUEST_CONTACTS, ArrayNode.class);
+
+    ObjectNode personDetailsNode = (ObjectNode) contactNode.at("/0/person/personDetails");
+    personDetailsNode.put("dateOfBirth", dob);
+
+    ObjectNode nameNode = (ObjectNode) contactNode.at("/0/person/names/0");
+    nameNode.put("firstName", firstName);
+    nameNode.put("middleNames", middleName);
+    nameNode.put("surName", lastName);
+
+    ObjectNode addressNode = (ObjectNode) contactNode.at("/0/addresses/0");
+    addressNode.put("street", street);
+    addressNode.put("street2", street2);
+    addressNode.put("poBoxNumber", poBoxNumber);
+    addressNode.put("postTown", postTown);
+    addressNode.put("stateProvinceCode", stateCode);
+    addressNode.put("postal", postal);
+
+    ObjectNode emailNode = (ObjectNode) contactNode.at("/0/emails/0");
+    emailNode.put("email", email);
+
+    ObjectNode phoneNode = (ObjectNode) contactNode.at("/0/telephones/0");
+    phoneNode.put("number", phone);
+
+    return contactNode;
   }
 
   private static String parseString(String value) {
