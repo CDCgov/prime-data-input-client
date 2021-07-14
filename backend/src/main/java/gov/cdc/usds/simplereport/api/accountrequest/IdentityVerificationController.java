@@ -3,6 +3,8 @@ package gov.cdc.usds.simplereport.api.accountrequest;
 import static gov.cdc.usds.simplereport.config.WebConfiguration.IDENTITY_VERIFICATION;
 
 import com.fasterxml.jackson.databind.JsonNode;
+import gov.cdc.usds.simplereport.api.model.accountrequest.IdentityVerificationAnswersRequest;
+import gov.cdc.usds.simplereport.api.model.accountrequest.IdentityVerificationAnswersResponse;
 import gov.cdc.usds.simplereport.api.model.accountrequest.IdentityVerificationRequest;
 import gov.cdc.usds.simplereport.service.idverification.ExperianService;
 import javax.annotation.PostConstruct;
@@ -35,12 +37,13 @@ public class IdentityVerificationController {
   }
 
   @PostMapping("/submit-answers")
-  public String submitAnswers(HttpServletRequest request) {
+  public IdentityVerificationAnswersResponse submitAnswers(
+      HttpServletRequest request, @RequestBody IdentityVerificationAnswersRequest requestBody) {
     /**
      * example request body: {"answers":["1","2","3","4","5"]} where "1" represents the user
      * selecting "2002" for "Please select the model year of the vehicle you purchased or leased
      * prior to January 2011"
      */
-    return "{\"passed\":true,\"email\":\"usds@example.com\"}";
+    return _experianService.submitAnswers(requestBody);
   }
 }

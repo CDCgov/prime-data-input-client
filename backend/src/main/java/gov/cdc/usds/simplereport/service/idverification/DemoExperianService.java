@@ -6,6 +6,8 @@ import com.fasterxml.jackson.core.JsonProcessingException;
 import com.fasterxml.jackson.databind.JsonNode;
 import com.fasterxml.jackson.databind.ObjectMapper;
 import com.fasterxml.jackson.databind.node.ObjectNode;
+import gov.cdc.usds.simplereport.api.model.accountrequest.IdentityVerificationAnswersRequest;
+import gov.cdc.usds.simplereport.api.model.accountrequest.IdentityVerificationAnswersResponse;
 import gov.cdc.usds.simplereport.api.model.accountrequest.IdentityVerificationRequest;
 import org.springframework.boot.autoconfigure.condition.ConditionalOnProperty;
 import org.springframework.stereotype.Service;
@@ -38,6 +40,11 @@ public class DemoExperianService implements ExperianService {
     } catch (RestClientException | NullPointerException | JsonProcessingException e) {
       throw new IllegalStateException("Questions could not be retrieved from Experian: ", e);
     }
+  }
+
+  public IdentityVerificationAnswersResponse submitAnswers(
+      IdentityVerificationAnswersRequest answerRequest) {
+    return new IdentityVerificationAnswersResponse(false);
   }
 
   public void reset() {

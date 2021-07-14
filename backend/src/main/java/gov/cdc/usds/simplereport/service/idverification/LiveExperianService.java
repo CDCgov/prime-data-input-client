@@ -6,6 +6,8 @@ import com.fasterxml.jackson.core.JsonProcessingException;
 import com.fasterxml.jackson.databind.JsonNode;
 import com.fasterxml.jackson.databind.node.JsonNodeFactory;
 import com.fasterxml.jackson.databind.node.ObjectNode;
+import gov.cdc.usds.simplereport.api.model.accountrequest.IdentityVerificationAnswersRequest;
+import gov.cdc.usds.simplereport.api.model.accountrequest.IdentityVerificationAnswersResponse;
 import gov.cdc.usds.simplereport.api.model.accountrequest.IdentityVerificationRequest;
 import gov.cdc.usds.simplereport.properties.ExperianProperties;
 import java.util.UUID;
@@ -76,13 +78,24 @@ public class LiveExperianService implements ExperianService {
       JsonNode questionsDataNode =
           responseEntity.at(
               "/clientResponsePayload/decisionElements/0/otherData/json/fraudSolutions/response/products/preciseIDServer/kba/questionSet");
+      String sessionId =
+          responseEntity
+              .at(
+                  "/clientResponsePayload/decisionElements/0/otherData/json/fraudSolutions/response/products/preciseIDServer/kba/general/sessionID")
+              .textValue();
 
       final JsonNodeFactory factory = JsonNodeFactory.instance;
       ObjectNode questionsResponse = factory.objectNode();
       questionsResponse.set("questionSet", questionsDataNode);
+      questionsResponse.put("sessionId", sessionId);
       return questionsResponse;
     } catch (RestClientException | NullPointerException | JsonProcessingException e) {
       throw new IllegalStateException("Questions could not be retrieved from Experian: ", e);
     }
+  }
+
+  public IdentityVerificationAnswersResponse submitAnswers(
+      IdentityVerificationAnswersRequest answerRequest) {
+    return new IdentityVerificationAnswersResponse(false);
   }
 }
