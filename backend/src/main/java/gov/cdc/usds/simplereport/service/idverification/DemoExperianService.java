@@ -1,6 +1,7 @@
 package gov.cdc.usds.simplereport.service.idverification;
 
 import static gov.cdc.usds.simplereport.service.idverification.ExperianTranslator.createInitialRequestBody;
+import static gov.cdc.usds.simplereport.service.idverification.ExperianTranslator.createSubmitAnswersRequestBody;
 
 import com.fasterxml.jackson.core.JsonProcessingException;
 import com.fasterxml.jackson.databind.JsonNode;
@@ -9,7 +10,9 @@ import com.fasterxml.jackson.databind.node.ObjectNode;
 import gov.cdc.usds.simplereport.api.model.accountrequest.IdentityVerificationAnswersRequest;
 import gov.cdc.usds.simplereport.api.model.accountrequest.IdentityVerificationAnswersResponse;
 import gov.cdc.usds.simplereport.api.model.accountrequest.IdentityVerificationRequest;
+import java.util.Arrays;
 import java.util.HashSet;
+import java.util.List;
 import java.util.Set;
 import java.util.UUID;
 import org.springframework.boot.autoconfigure.condition.ConditionalOnProperty;
@@ -34,14 +37,14 @@ public class DemoExperianService implements ExperianService {
   public JsonNode getQuestions(IdentityVerificationRequest userData) {
     // next steps: this still needs proper implementation
     try {
-      ObjectNode initialRequestBody =
-          createInitialRequestBody(
-              "fakeSubcode",
-              "fakeUsername",
-              "fakePassword",
-              "fakeTenantId",
-              "fakeClientReferenceId",
-              userData);
+      createInitialRequestBody(
+          "fakeSubcode",
+          "fakeUsername",
+          "fakePassword",
+          "fakeTenantId",
+          "fakeClientReferenceId",
+          userData);
+
       ObjectNode response =
           (ObjectNode)
               _objectMapper.readValue(
@@ -59,8 +62,30 @@ public class DemoExperianService implements ExperianService {
   }
 
   public IdentityVerificationAnswersResponse submitAnswers(
-      IdentityVerificationAnswersRequest answerRequest) {
-    return new IdentityVerificationAnswersResponse(false);
+      IdentityVerificationAnswersRequest answersRequest) {
+    try {
+      createSubmitAnswersRequestBody(
+          "fakeSubcode",
+          "fakeUsername",
+          "fakePassword",
+          "fakeTenantId",
+          "fakeClientReferenceId",
+          answersRequest);
+
+      List<Integer> expectedAnswers = Arrays.asList(1, 4, 2, 1);
+      boolean passed = expectedAnswers.equals(answersRequest.getAnswers());
+
+      UUID sessionUUID = UUID.fromString(answersRequest.getSessionId());
+      if (sessionIdSet.contains(sessionUUID)) {
+        sessionIdSet.remove(sessionUUID);
+      } else {
+        passed = false;
+      }
+
+      return new IdentityVerificationAnswersResponse(passed);
+    } catch (JsonProcessingException e) {
+      throw new IllegalStateException("Answers could not be validated by Experian: ", e);
+    }
   }
 
   public void reset() {

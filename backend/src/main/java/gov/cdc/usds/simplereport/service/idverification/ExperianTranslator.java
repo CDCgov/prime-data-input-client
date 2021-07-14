@@ -9,6 +9,7 @@ import com.fasterxml.jackson.databind.ObjectMapper;
 import com.fasterxml.jackson.databind.node.ArrayNode;
 import com.fasterxml.jackson.databind.node.JsonNodeFactory;
 import com.fasterxml.jackson.databind.node.ObjectNode;
+import gov.cdc.usds.simplereport.api.model.accountrequest.IdentityVerificationAnswersRequest;
 import gov.cdc.usds.simplereport.api.model.accountrequest.IdentityVerificationRequest;
 import java.text.SimpleDateFormat;
 import java.time.Instant;
@@ -16,6 +17,7 @@ import java.time.LocalDate;
 import java.time.format.DateTimeFormatter;
 import java.time.format.DateTimeParseException;
 import java.util.Date;
+import java.util.List;
 import org.apache.commons.codec.binary.Base64;
 
 /** Helper class to translate Experian requests and responses used for identity verification. */
@@ -54,26 +56,75 @@ public class ExperianTranslator {
       String clientReferenceId,
       IdentityVerificationRequest userData)
       throws JsonProcessingException {
-    String b64Password = new String(Base64.encodeBase64(password.getBytes()));
-    final JsonNodeFactory factory = JsonNodeFactory.instance;
+    ObjectNode applicationBody =
+        _objectMapper.readValue(INITIAL_REQUEST_APPLICATION, ObjectNode.class);
 
     // Create payload (includes user details)
-    JsonNode contactBody = createContact(userData);
+    final JsonNodeFactory factory = JsonNodeFactory.instance;
+    ObjectNode basePayload = factory.objectNode();
+    basePayload.set("contacts", createContact(userData));
+    basePayload.set("application", applicationBody);
+
+    return buildResponseNode(
+        subscriberSubcode, username, password, tenantId, clientReferenceId, basePayload);
+  }
+
+  /**
+   * Using user-provided data, create the body of an initial Experian request.
+   *
+   * @param subscriberSubcode SimpleReport's Experian subscriber subcode
+   * @param username SimpleReport's username to access Experian
+   * @param password SimpleReport's password to access Experian
+   * @param tenantId the tenant id provided by Experian
+   * @param clientReferenceId the client id provided by Experian
+   * @param answersRequest all user data associated with the request (name, phone number, etc)
+   * @return the JSON request body as a string
+   */
+  public static ObjectNode createSubmitAnswersRequestBody(
+      String subscriberSubcode,
+      String username,
+      String password,
+      String tenantId,
+      String clientReferenceId,
+      IdentityVerificationAnswersRequest answersRequest)
+      throws JsonProcessingException {
+    final JsonNodeFactory factory = JsonNodeFactory.instance;
+    ObjectNode basePayload = factory.objectNode();
+    basePayload.set("kba", createAnswersResponse(answersRequest));
+
+    return buildResponseNode(
+        subscriberSubcode, username, password, tenantId, clientReferenceId, basePayload);
+  }
+
+  private static ObjectNode buildResponseNode(
+      String subscriberSubcode,
+      String username,
+      String password,
+      String tenantId,
+      String clientReferenceId,
+      ObjectNode payloadNode)
+      throws JsonProcessingException {
+    // generate and add control section to the payload
+    String b64Password = new String(Base64.encodeBase64(password.getBytes()));
     JsonNode controlBody =
         _objectMapper.readValue(
             String.format(INITIAL_REQUEST_CONTROL, subscriberSubcode, username, b64Password),
             ArrayNode.class);
-    ObjectNode applicationBody =
-        _objectMapper.readValue(INITIAL_REQUEST_APPLICATION, ObjectNode.class);
+    payloadNode.set("control", controlBody);
 
-    ObjectNode payload = factory.objectNode();
-    payload.set("control", controlBody);
-    payload.set("contacts", contactBody);
-    payload.set("application", applicationBody);
+    final JsonNodeFactory factory = JsonNodeFactory.instance;
+    ObjectNode responseNode = factory.objectNode();
+    responseNode.set("header", createHeaderNode(tenantId, clientReferenceId));
+    responseNode.set("payload", payloadNode);
+    return responseNode;
+  }
 
+  private static JsonNode createHeaderNode(String tenantId, String clientReferenceId) {
     Date nowDate = Date.from(Instant.now());
     SimpleDateFormat formatter = new SimpleDateFormat("yyyy-MM-dd'T'HH:mm:ss'Z'");
     String nowDateString = formatter.format(nowDate);
+
+    final JsonNodeFactory factory = JsonNodeFactory.instance;
 
     // Create body-level headers
     ObjectNode headers = factory.objectNode();
@@ -86,11 +137,7 @@ public class ExperianTranslator {
     headers.put("time", "");
     headers.set("options", factory.objectNode());
 
-    // Bundle response
-    ObjectNode response = factory.objectNode();
-    response.set("header", headers);
-    response.set("payload", payload);
-    return response;
+    return headers;
   }
 
   /**
@@ -141,6 +188,26 @@ public class ExperianTranslator {
     phoneNode.put("number", phone);
 
     return contactNode;
+  }
+
+  private static JsonNode createAnswersResponse(IdentityVerificationAnswersRequest answersRequest) {
+    String experianSessionId = parseString(answersRequest.getSessionId());
+
+    final JsonNodeFactory factory = JsonNodeFactory.instance;
+
+    ObjectNode answersNode = factory.objectNode();
+    List<Integer> answerValues = answersRequest.getAnswers();
+    for (int i = 0; i < answerValues.size(); i++) {
+      int answerValue = answerValues.get(i);
+      answersNode.put("outWalletAnswer" + (i + 1), String.valueOf(answerValue));
+    }
+
+    ObjectNode kbaResponse = factory.objectNode();
+    kbaResponse.put("sessionId", experianSessionId);
+    kbaResponse.put("outWalletQuestionsRequest", answerValues.size());
+    kbaResponse.set("answers", answersNode);
+
+    return kbaResponse;
   }
 
   private static String parseString(String value) {

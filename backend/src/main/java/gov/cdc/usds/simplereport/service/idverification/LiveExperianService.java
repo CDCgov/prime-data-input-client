@@ -1,6 +1,7 @@
 package gov.cdc.usds.simplereport.service.idverification;
 
 import static gov.cdc.usds.simplereport.service.idverification.ExperianTranslator.createInitialRequestBody;
+import static gov.cdc.usds.simplereport.service.idverification.ExperianTranslator.createSubmitAnswersRequestBody;
 
 import com.fasterxml.jackson.core.JsonProcessingException;
 import com.fasterxml.jackson.databind.JsonNode;
@@ -68,13 +69,8 @@ public class LiveExperianService implements ExperianService {
               _experianProperties.getPreciseidTenantId(),
               _experianProperties.getPreciseidClientReferenceId(),
               userData);
-      HttpHeaders headers = new HttpHeaders();
-      headers.setContentType(MediaType.APPLICATION_JSON);
-      headers.setBearerAuth(fetchToken());
-      HttpEntity<ObjectNode> entity = new HttpEntity<>(initialRequestBody, headers);
-      ObjectNode responseEntity =
-          _restTemplate.postForObject(
-              _experianProperties.getInitialRequestEndpoint(), entity, ObjectNode.class);
+      ObjectNode responseEntity = submitExperianRequest(initialRequestBody);
+
       JsonNode questionsDataNode =
           responseEntity.at(
               "/clientResponsePayload/decisionElements/0/otherData/json/fraudSolutions/response/products/preciseIDServer/kba/questionSet");
@@ -95,7 +91,34 @@ public class LiveExperianService implements ExperianService {
   }
 
   public IdentityVerificationAnswersResponse submitAnswers(
-      IdentityVerificationAnswersRequest answerRequest) {
-    return new IdentityVerificationAnswersResponse(false);
+      IdentityVerificationAnswersRequest answersRequest) {
+    try {
+      ObjectNode finalRequestBody =
+          createSubmitAnswersRequestBody(
+              _experianProperties.getCrosscoreSubscriberSubcode(),
+              _experianProperties.getPreciseidUsername(),
+              _experianProperties.getPreciseidPassword(),
+              _experianProperties.getPreciseidTenantId(),
+              _experianProperties.getPreciseidClientReferenceId(),
+              answersRequest);
+      ObjectNode responseEntity = submitExperianRequest(finalRequestBody);
+
+      String decision = responseEntity.at("/responseHeader/overallResponse/decision").textValue();
+
+      // for now, accept a referral or acceptance response from experian
+      boolean passed = "REFER".equals(decision) || "ACCEPT".equals(decision);
+      return new IdentityVerificationAnswersResponse(passed);
+    } catch (RestClientException | NullPointerException | JsonProcessingException e) {
+      throw new IllegalStateException("Answers could not be validated by Experian: ", e);
+    }
+  }
+
+  private ObjectNode submitExperianRequest(ObjectNode requestBody) {
+    HttpHeaders headers = new HttpHeaders();
+    headers.setContentType(MediaType.APPLICATION_JSON);
+    headers.setBearerAuth(fetchToken());
+    HttpEntity<ObjectNode> entity = new HttpEntity<>(requestBody, headers);
+    return _restTemplate.postForObject(
+        _experianProperties.getInitialRequestEndpoint(), entity, ObjectNode.class);
   }
 }
