@@ -10,7 +10,7 @@ import lombok.Setter;
 @Getter
 @Setter
 @JsonNaming(PropertyNamingStrategy.KebabCaseStrategy.class)
-public class IdentityVerificationRequest {
+public class IdentityVerificationQuestionsRequest {
   @JsonProperty @NotNull private String firstName;
   @JsonProperty @NotNull private String lastName;
   @JsonProperty private String middleName;

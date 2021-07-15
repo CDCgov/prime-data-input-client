@@ -2,10 +2,10 @@ package gov.cdc.usds.simplereport.api.accountrequest;
 
 import static gov.cdc.usds.simplereport.config.WebConfiguration.IDENTITY_VERIFICATION;
 
-import com.fasterxml.jackson.databind.JsonNode;
 import gov.cdc.usds.simplereport.api.model.accountrequest.IdentityVerificationAnswersRequest;
 import gov.cdc.usds.simplereport.api.model.accountrequest.IdentityVerificationAnswersResponse;
-import gov.cdc.usds.simplereport.api.model.accountrequest.IdentityVerificationRequest;
+import gov.cdc.usds.simplereport.api.model.accountrequest.IdentityVerificationQuestionsRequest;
+import gov.cdc.usds.simplereport.api.model.accountrequest.IdentityVerificationQuestionsResponse;
 import gov.cdc.usds.simplereport.service.idverification.ExperianService;
 import javax.annotation.PostConstruct;
 import javax.servlet.http.HttpServletRequest;
@@ -21,6 +21,7 @@ import org.springframework.web.bind.annotation.RestController;
 @RestController
 @RequestMapping(IDENTITY_VERIFICATION)
 public class IdentityVerificationController {
+
   @Autowired private ExperianService _experianService;
 
   private static final Logger LOG = LoggerFactory.getLogger(IdentityVerificationController.class);
@@ -31,8 +32,8 @@ public class IdentityVerificationController {
   }
 
   @PostMapping("/get-questions")
-  public JsonNode getQuestions(
-      HttpServletRequest request, @RequestBody IdentityVerificationRequest requestBody) {
+  public IdentityVerificationQuestionsResponse getQuestions(
+      HttpServletRequest request, @RequestBody IdentityVerificationQuestionsRequest requestBody) {
     return _experianService.getQuestions(requestBody);
   }
 

@@ -10,7 +10,7 @@ import com.fasterxml.jackson.databind.node.ArrayNode;
 import com.fasterxml.jackson.databind.node.JsonNodeFactory;
 import com.fasterxml.jackson.databind.node.ObjectNode;
 import gov.cdc.usds.simplereport.api.model.accountrequest.IdentityVerificationAnswersRequest;
-import gov.cdc.usds.simplereport.api.model.accountrequest.IdentityVerificationRequest;
+import gov.cdc.usds.simplereport.api.model.accountrequest.IdentityVerificationQuestionsRequest;
 import java.text.SimpleDateFormat;
 import java.time.Instant;
 import java.time.LocalDate;
@@ -54,7 +54,7 @@ public class ExperianTranslator {
       String password,
       String tenantId,
       String clientReferenceId,
-      IdentityVerificationRequest userData)
+      IdentityVerificationQuestionsRequest userData)
       throws JsonProcessingException {
     ObjectNode applicationBody =
         _objectMapper.readValue(INITIAL_REQUEST_APPLICATION, ObjectNode.class);
@@ -149,7 +149,7 @@ public class ExperianTranslator {
    * @return a "contacts" object customized with the user's data.
    * @throws IllegalArgumentException if a required field is not present.
    */
-  private static JsonNode createContact(IdentityVerificationRequest userData)
+  private static JsonNode createContact(IdentityVerificationQuestionsRequest userData)
       throws IllegalArgumentException, JsonProcessingException {
     String firstName = parseString(userData.getFirstName());
     String lastName = parseString(userData.getLastName());

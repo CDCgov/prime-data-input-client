@@ -11,7 +11,7 @@ import com.fasterxml.jackson.core.JsonProcessingException;
 import com.fasterxml.jackson.databind.JsonNode;
 import com.fasterxml.jackson.databind.node.ObjectNode;
 import gov.cdc.usds.simplereport.api.model.accountrequest.IdentityVerificationAnswersRequest;
-import gov.cdc.usds.simplereport.api.model.accountrequest.IdentityVerificationRequest;
+import gov.cdc.usds.simplereport.api.model.accountrequest.IdentityVerificationQuestionsRequest;
 import java.util.Arrays;
 import java.util.List;
 import org.junit.jupiter.api.Test;
@@ -36,7 +36,7 @@ class ExperianTranslatorTest {
 
   @Test
   void createInitialRequestBody_worksWithValidInput() throws Exception {
-    IdentityVerificationRequest userData = createValidUserData();
+    IdentityVerificationQuestionsRequest userData = createValidUserData();
     ObjectNode requestBody = initialRequestHelper(userData);
 
     assertTrue(requestBody.has("payload"));
@@ -75,7 +75,7 @@ class ExperianTranslatorTest {
 
   @Test
   void createInitialRequestBody_successfulWithoutOptionalFields() throws Exception {
-    IdentityVerificationRequest userData = createValidUserData();
+    IdentityVerificationQuestionsRequest userData = createValidUserData();
     userData.setMiddleName(null);
 
     ObjectNode requestBody = initialRequestHelper(userData);
@@ -90,7 +90,7 @@ class ExperianTranslatorTest {
 
   @Test
   void createInitialRequestBody_failsWithoutRequiredData() {
-    IdentityVerificationRequest userData = createValidUserData();
+    IdentityVerificationQuestionsRequest userData = createValidUserData();
     userData.setFirstName(null);
     Exception exception =
         assertThrows(
@@ -103,7 +103,7 @@ class ExperianTranslatorTest {
 
   @Test
   void createInitialRequestBody_failsWithInvalidDate() {
-    IdentityVerificationRequest userData = createValidUserData();
+    IdentityVerificationQuestionsRequest userData = createValidUserData();
     userData.setDateOfBirth("180-12-03");
     Exception exception =
         assertThrows(
@@ -116,7 +116,7 @@ class ExperianTranslatorTest {
 
   @Test
   void createInitialRequestBody_failsWithInvalidDateFormat() {
-    IdentityVerificationRequest userData = createValidUserData();
+    IdentityVerificationQuestionsRequest userData = createValidUserData();
     userData.setDateOfBirth("1980/12/12");
     Exception exception =
         assertThrows(
@@ -167,8 +167,8 @@ class ExperianTranslatorTest {
 
   // helpers
 
-  private IdentityVerificationRequest createValidUserData() {
-    IdentityVerificationRequest request = new IdentityVerificationRequest();
+  private IdentityVerificationQuestionsRequest createValidUserData() {
+    IdentityVerificationQuestionsRequest request = new IdentityVerificationQuestionsRequest();
     request.setFirstName(FIRST_NAME);
     request.setLastName(LAST_NAME);
     request.setMiddleName(MIDDLE_NAME);
@@ -182,7 +182,7 @@ class ExperianTranslatorTest {
     return request;
   }
 
-  private ObjectNode initialRequestHelper(IdentityVerificationRequest userData)
+  private ObjectNode initialRequestHelper(IdentityVerificationQuestionsRequest userData)
       throws JsonProcessingException {
     return createInitialRequestBody(
         "subscriberSubcode", "username", "password", "tenantId", "clientReferenceId", userData);
