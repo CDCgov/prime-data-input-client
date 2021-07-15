@@ -24,7 +24,8 @@ import org.springframework.web.client.RestTemplate;
 
 @Service
 @ConditionalOnProperty("simple-report.experian.enabled")
-public class LiveExperianService implements ExperianService {
+public class LiveExperianService
+    implements gov.cdc.usds.simplereport.service.idverification.ExperianService {
 
   private final ExperianProperties _experianProperties;
   private RestTemplate _restTemplate;
@@ -33,6 +34,12 @@ public class LiveExperianService implements ExperianService {
   public LiveExperianService(final ExperianProperties experianProperties) {
     _experianProperties = experianProperties;
     _restTemplate = new RestTemplate();
+  }
+
+  public LiveExperianService(
+      final ExperianProperties experianProperties, final RestTemplate restTemplate) {
+    _experianProperties = experianProperties;
+    _restTemplate = restTemplate;
   }
 
   private String fetchToken() {
