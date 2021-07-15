@@ -88,6 +88,12 @@ public class DemoExperianService implements ExperianService {
     }
   }
 
+  // for test support
+
+  public void addSessionId(UUID uuid) {
+    sessionIdSet.add(uuid);
+  }
+
   public void reset() {
     sessionIdSet.clear();
   }
