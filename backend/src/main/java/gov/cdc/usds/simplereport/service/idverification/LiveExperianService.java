@@ -110,8 +110,9 @@ public class LiveExperianService
 
       String decision = responseEntity.at("/responseHeader/overallResponse/decision").textValue();
 
-      // for now, accept a referral or acceptance response from experian
-      boolean passed = "REFER".equals(decision) || "ACCEPT".equals(decision);
+      // if experian responds with ACCEPT, we will consider the id verification successful
+      boolean passed = "ACCEPT".equals(decision);
+
       return new IdentityVerificationAnswersResponse(passed);
     } catch (RestClientException | NullPointerException | JsonProcessingException e) {
       throw new IllegalStateException("Answers could not be validated by Experian: ", e);
