@@ -1,5 +1,6 @@
 package gov.cdc.usds.simplereport.api.accountrequest;
 
+import static gov.cdc.usds.simplereport.config.AuthorizationConfiguration.AUTHORIZER_BEAN;
 import static gov.cdc.usds.simplereport.config.WebConfiguration.IDENTITY_VERIFICATION;
 
 import gov.cdc.usds.simplereport.api.model.accountrequest.IdentityVerificationAnswersRequest;
@@ -12,12 +13,17 @@ import javax.servlet.http.HttpServletRequest;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 import org.springframework.beans.factory.annotation.Autowired;
+import org.springframework.security.access.prepost.PreAuthorize;
 import org.springframework.web.bind.annotation.PostMapping;
 import org.springframework.web.bind.annotation.RequestBody;
 import org.springframework.web.bind.annotation.RequestMapping;
 import org.springframework.web.bind.annotation.RestController;
 
-/** Controller used for identity verification via Experian. */
+/**
+ * Controller used for identity verification via Experian. Note that this controller is
+ * automatically authorized.
+ */
+@PreAuthorize("@" + AUTHORIZER_BEAN + ".permitAllAccountRequests()")
 @RestController
 @RequestMapping(IDENTITY_VERIFICATION)
 public class IdentityVerificationController {
