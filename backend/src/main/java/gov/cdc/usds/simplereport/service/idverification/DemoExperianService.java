@@ -25,14 +25,12 @@ import org.springframework.web.client.RestClientException;
 public class DemoExperianService implements ExperianService {
 
   private static final ObjectMapper _objectMapper = new ObjectMapper();
+  private static final List<Integer> EXPECTED_ANSWERS = Arrays.asList(1, 4, 2, 1);
+
   private final Set<UUID> sessionIdSet;
 
   public DemoExperianService() {
     sessionIdSet = new HashSet<>();
-  }
-
-  private String fetchToken() {
-    return "accessToken";
   }
 
   public IdentityVerificationQuestionsResponse getQuestions(
@@ -72,8 +70,7 @@ public class DemoExperianService implements ExperianService {
           "fakeClientReferenceId",
           answersRequest);
 
-      List<Integer> expectedAnswers = Arrays.asList(1, 4, 2, 1);
-      boolean passed = expectedAnswers.equals(answersRequest.getAnswers());
+      boolean passed = EXPECTED_ANSWERS.equals(answersRequest.getAnswers());
 
       UUID sessionUUID = UUID.fromString(answersRequest.getSessionId());
       if (sessionIdSet.contains(sessionUUID)) {

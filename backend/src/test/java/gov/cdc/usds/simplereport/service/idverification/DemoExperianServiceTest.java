@@ -14,7 +14,7 @@ import java.util.Arrays;
 import java.util.UUID;
 import org.junit.jupiter.api.Test;
 
-public class DemoExperianServiceTest extends BaseServiceTest<DemoExperianService> {
+class DemoExperianServiceTest extends BaseServiceTest<DemoExperianService> {
 
   @Test
   void getQuestions_success() {

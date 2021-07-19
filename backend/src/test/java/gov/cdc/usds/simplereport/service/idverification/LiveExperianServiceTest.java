@@ -22,7 +22,7 @@ import org.junit.jupiter.api.BeforeEach;
 import org.junit.jupiter.api.Test;
 import org.springframework.web.client.RestTemplate;
 
-public class LiveExperianServiceTest {
+class LiveExperianServiceTest {
 
   private LiveExperianService _service;
 

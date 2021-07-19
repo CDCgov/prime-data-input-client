@@ -27,6 +27,7 @@ import org.springframework.web.client.RestTemplate;
 public class LiveExperianService
     implements gov.cdc.usds.simplereport.service.idverification.ExperianService {
 
+  private static final String SUCCESS_DECISION = "ACCEPT";
   private final ExperianProperties _experianProperties;
   private RestTemplate _restTemplate;
 
@@ -58,11 +59,14 @@ public class LiveExperianService
 
     HttpEntity<ObjectNode> entity = new HttpEntity<>(requestBody, headers);
     try {
-      ObjectNode responseObject =
+      ObjectNode responseBody =
           _restTemplate.postForObject(
               _experianProperties.getTokenEndpoint(), entity, ObjectNode.class);
-      return responseObject.path("access_token").asText();
-    } catch (RestClientException | NullPointerException e) {
+      if (responseBody == null) {
+        throw new RestClientException("The Experian token request returned a null response.");
+      }
+      return responseBody.path("access_token").asText();
+    } catch (RestClientException e) {
       throw new IllegalArgumentException("The activation token could not be retrieved: ", e);
     }
   }
@@ -90,7 +94,7 @@ public class LiveExperianService
               .textValue();
 
       return new IdentityVerificationQuestionsResponse(sessionId, questionsDataNode);
-    } catch (RestClientException | NullPointerException | JsonProcessingException e) {
+    } catch (RestClientException | JsonProcessingException e) {
       throw new IllegalStateException("Questions could not be retrieved from Experian: ", e);
     }
   }
@@ -111,10 +115,10 @@ public class LiveExperianService
       String decision = responseEntity.at("/responseHeader/overallResponse/decision").textValue();
 
       // if experian responds with ACCEPT, we will consider the id verification successful
-      boolean passed = "ACCEPT".equals(decision);
+      boolean passed = SUCCESS_DECISION.equals(decision);
 
       return new IdentityVerificationAnswersResponse(passed);
-    } catch (RestClientException | NullPointerException | JsonProcessingException e) {
+    } catch (RestClientException | JsonProcessingException e) {
       throw new IllegalStateException("Answers could not be validated by Experian: ", e);
     }
   }
@@ -124,7 +128,12 @@ public class LiveExperianService
     headers.setContentType(MediaType.APPLICATION_JSON);
     headers.setBearerAuth(fetchToken());
     HttpEntity<ObjectNode> entity = new HttpEntity<>(requestBody, headers);
-    return _restTemplate.postForObject(
-        _experianProperties.getInitialRequestEndpoint(), entity, ObjectNode.class);
+    ObjectNode responseBody =
+        _restTemplate.postForObject(
+            _experianProperties.getInitialRequestEndpoint(), entity, ObjectNode.class);
+    if (responseBody == null) {
+      throw new RestClientException("A request to experian returned a null response.");
+    }
+    return responseBody;
   }
 }
