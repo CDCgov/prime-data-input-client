@@ -9,3 +9,5 @@ simple-report:
       - https://stg.simplereport.gov
   dynamics:
     enabled: true
+  experian:
+    enabled: true

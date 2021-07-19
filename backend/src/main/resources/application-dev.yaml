@@ -24,10 +24,3 @@ simple-report:
     upload-url: "https://prime-data-hub-test.azurefd.net/api/reports?option=SkipSend" # ValidatePayload, SkipSend, SkipInvalidItems
 twilio:
   enabled: false
-experian:
-  token-endpoint: "fakeEndpoint.com"
-  domain: "fakeDomain"
-  username: "fakeUsername"
-  password: "fakePassword"
-  client-id: "fakeClientId"
-  client-secret: "fakeClientSecret"
