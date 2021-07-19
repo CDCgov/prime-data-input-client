@@ -10,6 +10,7 @@ import gov.cdc.usds.simplereport.api.model.accountrequest.IdentityVerificationQu
 import gov.cdc.usds.simplereport.service.idverification.ExperianService;
 import javax.annotation.PostConstruct;
 import javax.servlet.http.HttpServletRequest;
+import javax.validation.Valid;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 import org.springframework.beans.factory.annotation.Autowired;
@@ -39,13 +40,15 @@ public class IdentityVerificationController {
 
   @PostMapping("/get-questions")
   public IdentityVerificationQuestionsResponse getQuestions(
-      HttpServletRequest request, @RequestBody IdentityVerificationQuestionsRequest requestBody) {
+      HttpServletRequest request,
+      @Valid @RequestBody IdentityVerificationQuestionsRequest requestBody) {
     return _experianService.getQuestions(requestBody);
   }
 
   @PostMapping("/submit-answers")
   public IdentityVerificationAnswersResponse submitAnswers(
-      HttpServletRequest request, @RequestBody IdentityVerificationAnswersRequest requestBody) {
+      HttpServletRequest request,
+      @Valid @RequestBody IdentityVerificationAnswersRequest requestBody) {
     /**
      * example request body: {"answers":["1","2","3","4","5"]} where "1" represents the user
      * selecting "2002" for "Please select the model year of the vehicle you purchased or leased
