@@ -156,7 +156,7 @@ resource "azurerm_monitor_scheduled_query_rules_alert" "frontend_error_boundary"
  | where type startswith "PrimeErrorBoundary"
   QUERY
 
-  severity    = 1
+  severity    = 3
   frequency   = 5
   time_window = 5
   trigger {
