@@ -13,6 +13,7 @@ import gov.cdc.usds.simplereport.config.authorization.DemoAuthenticationConfigur
 import gov.cdc.usds.simplereport.idp.repository.DemoOktaRepository;
 import gov.cdc.usds.simplereport.logging.AuditLoggingAdvice;
 import gov.cdc.usds.simplereport.service.ApiUserService;
+import gov.cdc.usds.simplereport.service.OrganizationService;
 import gov.cdc.usds.simplereport.service.idverification.DemoExperianService;
 import java.util.List;
 import java.util.UUID;
@@ -47,6 +48,7 @@ class IdentityVerificationControllerTest {
   @Autowired private MockMvc _mockMvc;
 
   @Autowired private DemoExperianService _experianService;
+  @MockBean private OrganizationService _orgService;
 
   // Dependencies of TenantDataAccessFilter
   @MockBean private ApiUserService _mockApiUserService;
@@ -55,12 +57,21 @@ class IdentityVerificationControllerTest {
   private static final String VALID_GET_QUESTIONS_REQUEST =
       "{\"first-name\":\"Jane\", \"last-name\":\"Doe\", \"date-of-birth\":\"1980-08-12\", \"email\":\"jane@example.com\", \"phone-number\":\"410-867-5309\", \"street-address1\":\"1600 Pennsylvania Ave\", \"city\":\"Washington\", \"state\":\"DC\", \"zip\":\"20500\"}";
 
+  private static final String FAKE_ORG_EXTERNAL_ID = "FAKE_ORG_EXTERNAL_ID";
   private static final UUID VALID_SESSION_UUID =
       UUID.fromString("099244e0-bebc-4f59-83fd-453dc7f0b858");
   private static final String SUBMIT_ANSWERS_CORRECT_REQUEST =
-      "{\"session-id\": \"" + VALID_SESSION_UUID + "\", \"answers\": [1, 4, 2, 1]}";
+      "{\"org-external-id\": \""
+          + FAKE_ORG_EXTERNAL_ID
+          + "\", \"session-id\": \""
+          + VALID_SESSION_UUID
+          + "\", \"answers\": [1, 4, 2, 1]}";
   private static final String SUBMIT_ANSWERS_INCORRECT_REQUEST =
-      "{\"session-id\": \"" + VALID_SESSION_UUID + "\", \"answers\": [4, 3, 2, 1]}";
+      "{\"org-external-id\": \""
+          + FAKE_ORG_EXTERNAL_ID
+          + "\", \"session-id\": \""
+          + VALID_SESSION_UUID
+          + "\", \"answers\": [4, 3, 2, 1]}";
 
   @BeforeEach
   public void setup() throws Exception {

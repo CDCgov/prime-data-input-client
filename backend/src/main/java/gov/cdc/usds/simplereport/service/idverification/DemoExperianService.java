@@ -11,6 +11,7 @@ import gov.cdc.usds.simplereport.api.model.accountrequest.IdentityVerificationAn
 import gov.cdc.usds.simplereport.api.model.accountrequest.IdentityVerificationAnswersResponse;
 import gov.cdc.usds.simplereport.api.model.accountrequest.IdentityVerificationQuestionsRequest;
 import gov.cdc.usds.simplereport.api.model.accountrequest.IdentityVerificationQuestionsResponse;
+import gov.cdc.usds.simplereport.api.model.errors.BadRequestException;
 import java.util.Arrays;
 import java.util.HashSet;
 import java.util.List;
@@ -26,6 +27,7 @@ public class DemoExperianService implements ExperianService {
 
   private static final ObjectMapper _objectMapper = new ObjectMapper();
   private static final List<Integer> EXPECTED_ANSWERS = Arrays.asList(1, 4, 2, 1);
+  private static final String USER_EMAIL_NOT_FOUND = "notfound@example.com";
 
   private final Set<UUID> sessionIdSet;
 
@@ -37,6 +39,10 @@ public class DemoExperianService implements ExperianService {
       IdentityVerificationQuestionsRequest userData) {
     // next steps: this still needs proper implementation
     try {
+      if (USER_EMAIL_NOT_FOUND.equals(userData.getEmail())) {
+        throw new BadRequestException("No questions returned due to consumer not found");
+      }
+
       createInitialRequestBody(
           "fakeSubcode",
           "fakeUsername",

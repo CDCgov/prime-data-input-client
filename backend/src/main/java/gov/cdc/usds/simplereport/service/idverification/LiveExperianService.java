@@ -11,6 +11,7 @@ import gov.cdc.usds.simplereport.api.model.accountrequest.IdentityVerificationAn
 import gov.cdc.usds.simplereport.api.model.accountrequest.IdentityVerificationAnswersResponse;
 import gov.cdc.usds.simplereport.api.model.accountrequest.IdentityVerificationQuestionsRequest;
 import gov.cdc.usds.simplereport.api.model.accountrequest.IdentityVerificationQuestionsResponse;
+import gov.cdc.usds.simplereport.api.model.errors.BadRequestException;
 import gov.cdc.usds.simplereport.properties.ExperianProperties;
 import java.util.UUID;
 import org.springframework.beans.factory.annotation.Autowired;
@@ -83,6 +84,20 @@ public class LiveExperianService
               _experianProperties.getPreciseidClientReferenceId(),
               userData);
       ObjectNode responseEntity = submitExperianRequest(initialRequestBody);
+
+      int kbaResultCode =
+          responseEntity
+              .at(
+                  "/clientResponsePayload/decisionElements/0/otherData/json/fraudSolutions/response/products/preciseIDServer/kbascore/general/kbaresultCode")
+              .asInt();
+      if (kbaResultCode == 9) {
+        String kbaResultCodeDescription =
+            responseEntity
+                .at(
+                    "/clientResponsePayload/decisionElements/0/otherData/json/fraudSolutions/response/products/preciseIDServer/kbascore/general/kbaresultCodeDescription")
+                .asText();
+        throw new BadRequestException(kbaResultCodeDescription);
+      }
 
       JsonNode questionsDataNode =
           responseEntity.at(

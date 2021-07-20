@@ -12,6 +12,8 @@ import lombok.Setter;
 @Setter
 @JsonNaming(PropertyNamingStrategy.KebabCaseStrategy.class)
 public class IdentityVerificationAnswersRequest {
+  @JsonProperty @NotNull private String orgExternalId;
+  // experian session id from getting questions
   @JsonProperty @NotNull private String sessionId;
   @JsonProperty @NotNull private List<Integer> answers;
 }

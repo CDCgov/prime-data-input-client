@@ -9,12 +9,15 @@ import gov.cdc.usds.simplereport.api.model.accountrequest.IdentityVerificationAn
 import gov.cdc.usds.simplereport.api.model.accountrequest.IdentityVerificationAnswersResponse;
 import gov.cdc.usds.simplereport.api.model.accountrequest.IdentityVerificationQuestionsRequest;
 import gov.cdc.usds.simplereport.api.model.accountrequest.IdentityVerificationQuestionsResponse;
+import gov.cdc.usds.simplereport.api.model.errors.BadRequestException;
 import gov.cdc.usds.simplereport.service.BaseServiceTest;
 import java.util.Arrays;
 import java.util.UUID;
 import org.junit.jupiter.api.Test;
 
 class DemoExperianServiceTest extends BaseServiceTest<DemoExperianService> {
+
+  private static final String USER_EMAIL_NOT_FOUND = "notfound@example.com";
 
   @Test
   void getQuestions_success() {
@@ -38,6 +41,20 @@ class DemoExperianServiceTest extends BaseServiceTest<DemoExperianService> {
               _service.getQuestions(request);
             });
     assertThat(exception).hasMessageContaining("String is required and cannot be empty.");
+  }
+
+  @Test
+  void getQuestions_noPersonFound_fail() {
+    IdentityVerificationQuestionsRequest request = createValidQuestionsRequest();
+    request.setEmail(USER_EMAIL_NOT_FOUND);
+
+    Exception exception =
+        assertThrows(
+            BadRequestException.class,
+            () -> {
+              _service.getQuestions(request);
+            });
+    assertThat(exception).hasMessageContaining("No questions returned due to consumer not found");
   }
 
   @Test
