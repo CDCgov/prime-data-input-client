@@ -8,8 +8,10 @@ import gov.cdc.usds.simplereport.api.Translators;
 import gov.cdc.usds.simplereport.api.accountrequest.errors.AccountRequestFailureException;
 import gov.cdc.usds.simplereport.api.model.Role;
 import gov.cdc.usds.simplereport.api.model.accountrequest.AccountRequest;
+import gov.cdc.usds.simplereport.api.model.accountrequest.AccountResponse;
 import gov.cdc.usds.simplereport.api.model.accountrequest.WaitlistRequest;
 import gov.cdc.usds.simplereport.db.model.DeviceType;
+import gov.cdc.usds.simplereport.db.model.Organization;
 import gov.cdc.usds.simplereport.db.model.auxiliary.PersonName;
 import gov.cdc.usds.simplereport.db.model.auxiliary.StreetAddress;
 import gov.cdc.usds.simplereport.properties.SendGridProperties;
@@ -100,8 +102,8 @@ public class AccountRequestController {
    */
   @PostMapping("")
   @Transactional(readOnly = false)
-  public void submitAccountRequest(
-      @Valid @RequestBody AccountRequest body, HttpServletRequest request) throws IOException {
+  public AccountResponse submitAccountRequest(@Valid @RequestBody AccountRequest body)
+      throws IOException {
     try {
       String subject = "New account request";
       if (LOG.isInfoEnabled()) {
@@ -191,20 +193,21 @@ public class AccountRequestController {
               reqVars.get("organizationName").replace(' ', '-').replace(':', '-'),
               UUID.randomUUID().toString());
 
-      _os.createOrganization(
-          reqVars.get("organizationName"),
-          Translators.parseOrganizationTypeFromName(reqVars.get("organizationType")),
-          orgExternalId,
-          reqVars.get("facilityName"),
-          reqVars.get("cliaNumber"),
-          facilityAddress,
-          Translators.parsePhoneNumber(reqVars.get("facilityPhoneNumber")),
-          null,
-          deviceSpecimenTypes,
-          providerName,
-          providerAddress,
-          Translators.parsePhoneNumber(reqVars.get("opPhoneNumber")),
-          reqVars.get("npi"));
+      Organization org =
+          _os.createOrganization(
+              reqVars.get("organizationName"),
+              Translators.parseOrganizationTypeFromName(reqVars.get("organizationType")),
+              orgExternalId,
+              reqVars.get("facilityName"),
+              reqVars.get("cliaNumber"),
+              facilityAddress,
+              Translators.parsePhoneNumber(reqVars.get("facilityPhoneNumber")),
+              null,
+              deviceSpecimenTypes,
+              providerName,
+              providerAddress,
+              Translators.parsePhoneNumber(reqVars.get("opPhoneNumber")),
+              reqVars.get("npi"));
 
       /**
        * Note: we are sending the emails *after* creating the organization so the validation logic
@@ -221,6 +224,8 @@ public class AccountRequestController {
       _aus.createUser(reqVars.get("email"), adminName, orgExternalId, Role.ADMIN);
 
       _crm.submitAccountRequestData(body);
+
+      return new AccountResponse(org.getExternalId());
     } catch (IOException e) {
       throw new AccountRequestFailureException(e);
     }

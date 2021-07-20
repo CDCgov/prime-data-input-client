@@ -13,6 +13,7 @@ import static org.mockito.Mockito.verify;
 import static org.mockito.Mockito.verifyNoInteractions;
 import static org.mockito.Mockito.when;
 import static org.springframework.test.web.servlet.request.MockMvcRequestBuilders.post;
+import static org.springframework.test.web.servlet.result.MockMvcResultMatchers.jsonPath;
 import static org.springframework.test.web.servlet.result.MockMvcResultMatchers.status;
 
 import com.sendgrid.helpers.mail.Mail;
@@ -110,6 +111,8 @@ class AccountRequestControllerTest {
   @Captor private ArgumentCaptor<StreetAddress> addressCaptor;
   @Captor private ArgumentCaptor<AccountRequest> accountRequestCaptor;
 
+  private static final String FAKE_ORG_EXTERNAL_ID = "FAKE_ORG_EXTERNAL_ID";
+
   @Test
   void waitlistIsOk() throws Exception {
     String requestBody =
@@ -175,7 +178,12 @@ class AccountRequestControllerTest {
     UUID deviceUuid3 = UUID.randomUUID();
     UUID deviceUuid4 = UUID.randomUUID();
     UUID acctRequestApiUserUuid = UUID.randomUUID();
+    when(orgService.createOrganization(
+            any(), any(), any(), any(), any(), any(), any(), any(), any(), any(), any(), any(),
+            any()))
+        .thenReturn(organization);
     when(orgService.getOrganization(any())).thenReturn(organization);
+    when(organization.getExternalId()).thenReturn(FAKE_ORG_EXTERNAL_ID);
     when(apiUserRepository.save(any())).thenReturn(apiUser);
     when(apiUserRepository.findByLoginEmail("account-request-noreply@simplereport.gov"))
         .thenReturn(Optional.of(acctRequestApiUser));
@@ -224,7 +232,11 @@ class AccountRequestControllerTest {
             .characterEncoding("UTF-8")
             .content(requestBody);
 
-    this._mockMvc.perform(builder).andExpect(status().isOk());
+    this._mockMvc
+        .perform(builder)
+        .andExpect(status().isOk())
+        .andExpect(
+            jsonPath("$.orgExternalId", org.hamcrest.Matchers.equalTo(FAKE_ORG_EXTERNAL_ID)));
 
     // mail 1: to us (contains formatted request data)
     verify(emailService, times(1))
