@@ -83,4 +83,9 @@ describe("Header.tsx", () => {
     });
     expect(useTrackEvent).toHaveBeenCalledWith(undefined, "Support", {});
   });
+  it("it does not render login links", () => {
+    expect(
+      screen.queryByText("Login as", { exact: false })
+    ).not.toBeInTheDocument();
+  });
 });
