@@ -16,6 +16,8 @@ simple-report:
       - https://simplereport.gov
   dynamics:
     enabled: true
+  experian:
+    enabled: true
 twilio:
   enabled: true
   from-number: "+14045312484"

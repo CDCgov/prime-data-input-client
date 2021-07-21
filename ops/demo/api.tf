@@ -37,6 +37,18 @@ module "simple_report_api" {
     DYNAMICS_CLIENT_SECRET                = "@Microsoft.KeyVault(SecretUri=${data.azurerm_key_vault_secret.dynamics_client_secret.id})"
     DYNAMICS_TENANT_ID                    = "@Microsoft.KeyVault(SecretUri=${data.azurerm_key_vault_secret.dynamics_tenant_id.id})"
     DYNAMICS_RESOURCE_URL                 = "@Microsoft.KeyVault(SecretUri=${data.azurerm_key_vault_secret.dynamics_resource_url.id})"
+    EXPERIAN_TOKEN_ENDPOINT               = "@Microsoft.KeyVault(SecretUri=${data.azurerm_key_vault_secret.experian_token_endpoint.id})"
+    EXPERIAN_INITIAL_REQUEST_ENDPOINT     = "@Microsoft.KeyVault(SecretUri=${data.azurerm_key_vault_secret.experian_initial_request_endpoint.id})"
+    EXPERIAN_DOMAIN                       = "@Microsoft.KeyVault(SecretUri=${data.azurerm_key_vault_secret.experian_domain.id})"
+    EXPERIAN_CLIENT_ID                    = "@Microsoft.KeyVault(SecretUri=${data.azurerm_key_vault_secret.experian_client_id.id})"
+    EXPERIAN_CLIENT_SECRET                = "@Microsoft.KeyVault(SecretUri=${data.azurerm_key_vault_secret.experian_client_secret.id})"
+    EXPERIAN_CC_SUBSCRIBER_SUBCODE        = "@Microsoft.KeyVault(SecretUri=${data.azurerm_key_vault_secret.experian_crosscore_subscriber_subcode.id})"
+    EXPERIAN_CC_USERNAME                  = "@Microsoft.KeyVault(SecretUri=${data.azurerm_key_vault_secret.experian_crosscore_username.id})"
+    EXPERIAN_CC_PASSWORD                  = "@Microsoft.KeyVault(SecretUri=${data.azurerm_key_vault_secret.experian_crosscore_password.id})"
+    EXPERIAN_PID_TENANT_ID                = "@Microsoft.KeyVault(SecretUri=${data.azurerm_key_vault_secret.experian_preciseid_tenant_id.id})"
+    EXPERIAN_PID_CLIENT_REFERENCE_ID      = "@Microsoft.KeyVault(SecretUri=${data.azurerm_key_vault_secret.experian_preciseid_client_reference_id.id})"
+    EXPERIAN_PID_USERNAME                 = "@Microsoft.KeyVault(SecretUri=${data.azurerm_key_vault_secret.experian_preciseid_username.id})"
+    EXPERIAN_PID_PASSWORD                 = "@Microsoft.KeyVault(SecretUri=${data.azurerm_key_vault_secret.experian_preciseid_password.id})"
     # true by default: can be disabled quickly here
     # SPRING_LIQUIBASE_ENABLED                       = "true"
     # this shadows (and overrides) an identical declaration in application.yaml

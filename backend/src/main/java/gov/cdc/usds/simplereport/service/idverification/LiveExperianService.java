@@ -1,14 +1,21 @@
 package gov.cdc.usds.simplereport.service.idverification;
 
 import static gov.cdc.usds.simplereport.service.idverification.ExperianTranslator.createInitialRequestBody;
+import static gov.cdc.usds.simplereport.service.idverification.ExperianTranslator.createSubmitAnswersRequestBody;
 
-import gov.cdc.usds.simplereport.api.model.accountrequest.IdentityVerificationRequest;
-import gov.cdc.usds.simplereport.config.BeanProfiles;
+import com.fasterxml.jackson.core.JsonProcessingException;
+import com.fasterxml.jackson.databind.JsonNode;
+import com.fasterxml.jackson.databind.node.JsonNodeFactory;
+import com.fasterxml.jackson.databind.node.ObjectNode;
+import gov.cdc.usds.simplereport.api.model.accountrequest.IdentityVerificationAnswersRequest;
+import gov.cdc.usds.simplereport.api.model.accountrequest.IdentityVerificationAnswersResponse;
+import gov.cdc.usds.simplereport.api.model.accountrequest.IdentityVerificationQuestionsRequest;
+import gov.cdc.usds.simplereport.api.model.accountrequest.IdentityVerificationQuestionsResponse;
+import gov.cdc.usds.simplereport.api.model.errors.BadRequestException;
 import gov.cdc.usds.simplereport.properties.ExperianProperties;
 import java.util.UUID;
-import org.json.JSONObject;
 import org.springframework.beans.factory.annotation.Autowired;
-import org.springframework.context.annotation.Profile;
+import org.springframework.boot.autoconfigure.condition.ConditionalOnProperty;
 import org.springframework.http.HttpEntity;
 import org.springframework.http.HttpHeaders;
 import org.springframework.http.MediaType;
@@ -17,11 +24,15 @@ import org.springframework.web.client.RestClientException;
 import org.springframework.web.client.RestTemplate;
 
 @Service
-@Profile("!" + BeanProfiles.NO_EXPERIAN)
-public class LiveExperianService implements ExperianService {
+@ConditionalOnProperty("simple-report.experian.enabled")
+public class LiveExperianService
+    implements gov.cdc.usds.simplereport.service.idverification.ExperianService {
+
+  private static final String SUCCESS_DECISION = "ACCEPT";
+  private static final int KBA_SUCCESS_RESULT_CODE = 0;
 
   private final ExperianProperties _experianProperties;
-  private RestTemplate _restTemplate;
+  private final RestTemplate _restTemplate;
 
   @Autowired
   public LiveExperianService(final ExperianProperties experianProperties) {
@@ -29,50 +40,120 @@ public class LiveExperianService implements ExperianService {
     _restTemplate = new RestTemplate();
   }
 
-  public String fetchToken() {
+  public LiveExperianService(
+      final ExperianProperties experianProperties, final RestTemplate restTemplate) {
+    _experianProperties = experianProperties;
+    _restTemplate = restTemplate;
+  }
+
+  private String fetchToken() {
     String guid = UUID.randomUUID().toString();
     HttpHeaders headers = new HttpHeaders();
     headers.setContentType(MediaType.APPLICATION_JSON);
     headers.add("X-Correlation-Id", guid);
     headers.add("X-User-Domain", _experianProperties.getDomain());
 
-    JSONObject requestBody = new JSONObject();
-    requestBody.put(
-        "username", _experianProperties.getUsername() + "@" + _experianProperties.getDomain());
-    requestBody.put("password", _experianProperties.getPassword());
+    final JsonNodeFactory factory = JsonNodeFactory.instance;
+    ObjectNode requestBody = factory.objectNode();
+    requestBody.put("username", _experianProperties.getCrosscoreUsername());
+    requestBody.put("password", _experianProperties.getCrosscorePassword());
     requestBody.put("client_id", _experianProperties.getClientId());
     requestBody.put("client_secret", _experianProperties.getClientSecret());
-    HttpEntity<String> entity = new HttpEntity<>(requestBody.toString(), headers);
+
+    HttpEntity<ObjectNode> entity = new HttpEntity<>(requestBody, headers);
     try {
-      JSONObject response =
+      ObjectNode responseBody =
           _restTemplate.postForObject(
-              _experianProperties.getTokenEndpoint(), entity, JSONObject.class);
-      return response.getString("access_token");
-    } catch (RestClientException | NullPointerException e) {
+              _experianProperties.getTokenEndpoint(), entity, ObjectNode.class);
+      if (responseBody == null) {
+        throw new RestClientException("The Experian token request returned a null response.");
+      }
+      return responseBody.path("access_token").asText();
+    } catch (RestClientException e) {
       throw new IllegalArgumentException("The activation token could not be retrieved: ", e);
     }
   }
 
-  public String getQuestions(IdentityVerificationRequest userData) {
-    String initialRequestBody =
-        createInitialRequestBody(
-            _experianProperties.getUsername(),
-            _experianProperties.getPassword(),
-            userData,
-            "fakeTenantId",
-            "fakeClientReferenceId");
+  public IdentityVerificationQuestionsResponse getQuestions(
+      IdentityVerificationQuestionsRequest userData) {
+    try {
+      ObjectNode initialRequestBody =
+          createInitialRequestBody(
+              _experianProperties.getCrosscoreSubscriberSubcode(),
+              _experianProperties.getPreciseidUsername(),
+              _experianProperties.getPreciseidPassword(),
+              _experianProperties.getPreciseidTenantId(),
+              _experianProperties.getPreciseidClientReferenceId(),
+              userData);
+      ObjectNode responseEntity = submitExperianRequest(initialRequestBody);
+
+      // look for errors in KIQ response ("CrossCore - PreciseId (Option 24).pdf" page 79)
+      int kbaResultCode =
+          responseEntity
+              .at(
+                  "/clientResponsePayload/decisionElements/0/otherData/json/fraudSolutions/response/products/preciseIDServer/kbascore/general/kbaresultCode")
+              .asInt();
+      if (kbaResultCode != KBA_SUCCESS_RESULT_CODE) {
+        String kbaResultCodeDescription =
+            responseEntity
+                .at(
+                    "/clientResponsePayload/decisionElements/0/otherData/json/fraudSolutions/response/products/preciseIDServer/kbascore/general/kbaresultCodeDescription")
+                .asText();
+        throw new BadRequestException(kbaResultCodeDescription);
+      }
+
+      // return KIQ questions and session id
+      JsonNode questionsDataNode =
+          responseEntity.at(
+              "/clientResponsePayload/decisionElements/0/otherData/json/fraudSolutions/response/products/preciseIDServer/kba/questionSet");
+      String sessionId =
+          responseEntity
+              .at(
+                  "/clientResponsePayload/decisionElements/0/otherData/json/fraudSolutions/response/products/preciseIDServer/kba/general/sessionID")
+              .textValue();
+
+      return new IdentityVerificationQuestionsResponse(sessionId, questionsDataNode);
+    } catch (RestClientException | JsonProcessingException e) {
+      throw new IllegalStateException("Questions could not be retrieved from Experian: ", e);
+    }
+  }
+
+  public IdentityVerificationAnswersResponse submitAnswers(
+      IdentityVerificationAnswersRequest answersRequest) {
+    try {
+      ObjectNode finalRequestBody =
+          createSubmitAnswersRequestBody(
+              _experianProperties.getCrosscoreSubscriberSubcode(),
+              _experianProperties.getPreciseidUsername(),
+              _experianProperties.getPreciseidPassword(),
+              _experianProperties.getPreciseidTenantId(),
+              _experianProperties.getPreciseidClientReferenceId(),
+              answersRequest);
+      ObjectNode responseEntity = submitExperianRequest(finalRequestBody);
+
+      // find overall decision ("CrossCore 2.x Technical Developer Guide.pdf" page 28-29)
+      String decision = responseEntity.at("/responseHeader/overallResponse/decision").textValue();
+
+      // if experian responds with ACCEPT, we will consider the id verification successful
+      boolean passed = SUCCESS_DECISION.equals(decision);
+
+      return new IdentityVerificationAnswersResponse(passed);
+    } catch (RestClientException | JsonProcessingException e) {
+      throw new IllegalStateException("Answers could not be validated by Experian: ", e);
+    }
+  }
+
+  private ObjectNode submitExperianRequest(ObjectNode requestBody) {
     HttpHeaders headers = new HttpHeaders();
     headers.setContentType(MediaType.APPLICATION_JSON);
-    headers.add("Authorization: Bearer", fetchToken());
-    HttpEntity<String> entity = new HttpEntity<>(initialRequestBody, headers);
-    try {
-      JSONObject response =
-          _restTemplate.postForObject(
-              _experianProperties.getIntialRequestEndpoint(), entity, JSONObject.class);
-      return "{\"questionSet\":[{\"questionType\":28,\"questionText\":\"Please select the model year of the vehicle you purchased or leased prior to January 2011 .\",\"questionSelect\":{\"questionChoice\":[\"2002\",\"2003\",\"2004\",\"2005\",\"NONE OF THE ABOVE/DOES NOT APPLY\"]}},{\"questionType\":24,\"questionText\":\"Which of the following professions do you currently or have If there is not a matched profession, please select 'NONE OF THE ABOVE'.\",\"questionSelect\":{\"questionChoice\":[\"DENTIST / DENTAL HYGIENIST\",\"SOCIAL WORKER\",\"OPTICIAN / OPTOMETRIST\",\"ELECTRICIAN\",\"NONE OF THE ABOVE/DOES NOT APPLY\"]}},{\"questionType\":41,\"questionText\":\"Please select the number of bedrooms in your home from the following choices. If the number of bedrooms in your home is not one of the choices please select 'NONE OF THE ABOVE'.\",\"questionSelect\":{\"questionChoice\":[\"2\",\"3\",\"4\",\"5\",\"NONE OF THE ABOVE/DOES NOT APPLY\"]}},{\"questionType\":47,\"questionText\":\"According to your credit profile, you may have opened a Home type loan in or around May 2015. Please select the lender to whom you currently made your payments.\",\"questionSelect\":{\"questionChoice\":[\"UC LENDING\",\"CTX MORTGAGE\",\"MID AMERICA MORTGAGE\",\"1ST NATIONWIDE MTG\",\"NONE OF THE ABOVE/DOES NOT APPLY\"]}},{\"questionType\":49,\"questionText\":\"According to our records, you graduated from which of the following High Schools?\",\"questionSelect\":{\"questionChoice\":[\"BAXTER SPRINGS HIGH SCHOOL\",\"BELLS HIGH SCHOOL\",\"LOCKNEY HIGH SCHOOL\",\"AGUA DULCE HIGH SCHOOL\",\"NONE OF THE ABOVE/DOES NOT APPLY\"]}}]}";
-      // next steps: unwrap the response and get the real questions
-    } catch (RestClientException | NullPointerException e) {
-      throw new IllegalStateException("Questions could not be retrieved from Experian", e);
+    headers.setBearerAuth(fetchToken());
+    HttpEntity<ObjectNode> entity = new HttpEntity<>(requestBody, headers);
+    ObjectNode responseBody =
+        _restTemplate.postForObject(
+            _experianProperties.getInitialRequestEndpoint(), entity, ObjectNode.class);
+    if (responseBody == null) {
+      throw new RestClientException("A request to experian returned a null response.");
     }
+    return responseBody;
   }
 }

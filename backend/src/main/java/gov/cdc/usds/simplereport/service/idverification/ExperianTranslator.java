@@ -3,11 +3,22 @@ package gov.cdc.usds.simplereport.service.idverification;
 import static gov.cdc.usds.simplereport.api.Translators.parseEmail;
 import static gov.cdc.usds.simplereport.api.Translators.parseState;
 
-import gov.cdc.usds.simplereport.api.model.accountrequest.IdentityVerificationRequest;
+import com.fasterxml.jackson.core.JsonProcessingException;
+import com.fasterxml.jackson.databind.JsonNode;
+import com.fasterxml.jackson.databind.ObjectMapper;
+import com.fasterxml.jackson.databind.node.ArrayNode;
+import com.fasterxml.jackson.databind.node.JsonNodeFactory;
+import com.fasterxml.jackson.databind.node.ObjectNode;
+import gov.cdc.usds.simplereport.api.model.accountrequest.IdentityVerificationAnswersRequest;
+import gov.cdc.usds.simplereport.api.model.accountrequest.IdentityVerificationQuestionsRequest;
+import java.text.SimpleDateFormat;
+import java.time.Instant;
 import java.time.LocalDate;
 import java.time.format.DateTimeFormatter;
 import java.time.format.DateTimeParseException;
-import org.json.JSONObject;
+import java.util.Date;
+import java.util.List;
+import org.apache.commons.codec.binary.Base64;
 
 /** Helper class to translate Experian requests and responses used for identity verification. */
 public class ExperianTranslator {
@@ -16,14 +27,16 @@ public class ExperianTranslator {
     throw new IllegalStateException("ExperianTranslator is a utility class");
   }
 
+  private static final ObjectMapper _objectMapper = new ObjectMapper();
+
   public static final String INITIAL_REQUEST_CONTACTS =
-      "{\"contacts\":[{\"id\":\"APPLICANT_CONTACT_ID_1\",\"person\":{\"typeOfPerson\":\"\",\"personIdentifier\":\"\",\"personDetails\":{\"dateOfBirth\":\"%s\",\"yearOfBirth\":\"\",\"age\":\"\",\"gender\":\"\",\"noOfDependents\":\"\",\"occupancyStatus\":\"\",\"mothersMaidenName\":\"\",\"spouseName\":\"\"},\"names\":[{\"id\":\"\",\"firstName\":\"%s\",\"middleNames\":\"%s\",\"surName\":\"%s\",\"nameSuffix\":\"\"}]},\"addresses\":[{\"id\":\"Main_Contact_Address_0\",\"addressType\":\"CURRENT\",\"poBoxNumber\":\"%s\",\"street\":\"%s\",\"street2\":\"%s\",\"postTown\":\"%s\",\"postal\":\"%s\",\"stateProvinceCode\":\"%s\"}],\"telephones\":[{\"id\":\"Main_Phone_0\",\"number\":\"%s\"}],\"emails\":[{\"id\":\"MAIN_EMAIL_0\",\"type\":\"\",\"email\":\"%s\"}]}]}";
+      "[{\"id\":\"APPLICANT_CONTACT_ID_1\",\"person\":{\"typeOfPerson\":\"\",\"personIdentifier\":\"\",\"personDetails\":{},\"names\":[{}]},\"addresses\":[{\"id\":\"Main_Contact_Address_0\",\"addressType\":\"CURRENT\"}],\"telephones\":[{\"id\":\"Main_Phone_0\"}],\"emails\":[{\"id\":\"MAIN_EMAIL_0\"}]}]";
 
   public static final String INITIAL_REQUEST_CONTROL =
-      "{\"control\":[{\"option\":\"PIDXML_VERSION\",\"value\":\"06.00\"},{\"option\":\"SUBSCRIBER_PREAMBLE\",\"value\":\"TBD3\"},{\"option\":\"SUBSCRIBER_OPERATOR_INITIAL\",\"value\":\"CD\"},{\"option\":\"SUBSCRIBER_SUB_CODE\",\"value\":\"2923674\"},{\"option\":\"PID_USERNAME\",\"value\":\"%s\"},{\"option\":\"PID_PASSWORD\",\"value\":\"%s\"},{\"option\":\"VERBOSE\",\"value\":\"Y\"},{\"option\":\"PRODUCT_OPTION\",\"value\":\"24\"},{\"option\":\"DETAIL_REQUEST\",\"value\":\"D\"},{\"option\":\"VENDOR\",\"value\":\"123\"},{\"option\":\"VENDOR_VERSION\",\"value\":\"11\"},{\"option\":\"BROKER_NUMBER\",\"value\":\"\"},{\"option\":\"END_USER\",\"value\":\"\"},{\"option\":\"FREEZE_KEY_PIN\",\"value\":\"\"}]}";
+      "[{\"option\":\"PIDXML_VERSION\",\"value\":\"06.00\"},{\"option\":\"SUBSCRIBER_PREAMBLE\",\"value\":\"TBD3\"},{\"option\":\"SUBSCRIBER_OPERATOR_INITIAL\",\"value\":\"CD\"},{\"option\":\"SUBSCRIBER_SUB_CODE\",\"value\":\"%s\"},{\"option\":\"PID_USERNAME\",\"value\":\"%s\"},{\"option\":\"PID_PASSWORD\",\"value\":\"%s\"},{\"option\":\"VERBOSE\",\"value\":\"N\"},{\"option\":\"PRODUCT_OPTION\",\"value\":\"24\"},{\"option\":\"DETAIL_REQUEST\",\"value\":\"D\"},{\"option\":\"VENDOR\",\"value\":\"123\"},{\"option\":\"VENDOR_VERSION\",\"value\":\"11\"},{\"option\":\"BROKER_NUMBER\",\"value\":\"\"},{\"option\":\"END_USER\",\"value\":\"\"},{\"option\":\"FREEZE_KEY_PIN\",\"value\":\"\"}]";
 
   public static final String INITIAL_REQUEST_APPLICATION =
-      "{\"application\":{\"productDetails\":{\"productType\":\"WRITTEN_INSTRUCTIONS\"},\"applicants\":[{\"contactId\":\"APPLICANT_CONTACT_ID_1\",\"applicantType\":\"CO_APPLICANT\"}]}}";
+      "{\"productDetails\":{\"productType\":\"WRITTEN_INSTRUCTIONS\"},\"applicants\":[{\"contactId\":\"APPLICANT_CONTACT_ID_1\",\"applicantType\":\"CO_APPLICANT\"}]}";
 
   /**
    * Using user-provided data, create the body of an initial Experian request.
@@ -35,33 +48,97 @@ public class ExperianTranslator {
    * @param clientReferenceId the client id provided by Experian
    * @return the JSON request body as a string
    */
-  public static String createInitialRequestBody(
+  public static ObjectNode createInitialRequestBody(
+      String subscriberSubcode,
       String username,
       String password,
-      IdentityVerificationRequest userData,
       String tenantId,
-      String clientReferenceId) {
+      String clientReferenceId,
+      IdentityVerificationQuestionsRequest userData)
+      throws JsonProcessingException {
+    ObjectNode applicationBody =
+        _objectMapper.readValue(INITIAL_REQUEST_APPLICATION, ObjectNode.class);
+
     // Create payload (includes user details)
-    JSONObject contactBody = createContact(userData);
-    JSONObject controlBody =
-        new JSONObject(String.format(INITIAL_REQUEST_CONTROL, username, password));
-    JSONObject applicationBody = new JSONObject(INITIAL_REQUEST_APPLICATION);
-    JSONObject payload = new JSONObject();
-    payload.put("control", controlBody.get("control"));
-    payload.put("contacts", contactBody.get("contacts"));
-    payload.put("application", applicationBody.get("application"));
+    final JsonNodeFactory factory = JsonNodeFactory.instance;
+    ObjectNode basePayload = factory.objectNode();
+    basePayload.set("contacts", createContact(userData));
+    basePayload.set("application", applicationBody);
+
+    return buildResponseNode(
+        subscriberSubcode, username, password, tenantId, clientReferenceId, basePayload);
+  }
+
+  /**
+   * Using user-provided data, create the body of a final Experian request, this request is
+   * submitted to Experian to determine id verification status.
+   *
+   * @param subscriberSubcode SimpleReport's Experian subscriber subcode
+   * @param username SimpleReport's username to access Experian
+   * @param password SimpleReport's password to access Experian
+   * @param tenantId the tenant id provided by Experian
+   * @param clientReferenceId the client id provided by Experian
+   * @param answersRequest all user data associated with the request (name, phone number, etc)
+   * @return the JSON request body as a string
+   */
+  public static ObjectNode createSubmitAnswersRequestBody(
+      String subscriberSubcode,
+      String username,
+      String password,
+      String tenantId,
+      String clientReferenceId,
+      IdentityVerificationAnswersRequest answersRequest)
+      throws JsonProcessingException {
+    final JsonNodeFactory factory = JsonNodeFactory.instance;
+    ObjectNode basePayload = factory.objectNode();
+    basePayload.set("kba", createAnswersResponse(answersRequest));
+
+    return buildResponseNode(
+        subscriberSubcode, username, password, tenantId, clientReferenceId, basePayload);
+  }
+
+  private static ObjectNode buildResponseNode(
+      String subscriberSubcode,
+      String username,
+      String password,
+      String tenantId,
+      String clientReferenceId,
+      ObjectNode payloadNode)
+      throws JsonProcessingException {
+    // generate and add control section to the payload
+    String b64Password = new String(Base64.encodeBase64(password.getBytes()));
+    JsonNode controlBody =
+        _objectMapper.readValue(
+            String.format(INITIAL_REQUEST_CONTROL, subscriberSubcode, username, b64Password),
+            ArrayNode.class);
+    payloadNode.set("control", controlBody);
+
+    final JsonNodeFactory factory = JsonNodeFactory.instance;
+    ObjectNode responseNode = factory.objectNode();
+    responseNode.set("header", createHeaderNode(tenantId, clientReferenceId));
+    responseNode.set("payload", payloadNode);
+    return responseNode;
+  }
+
+  private static JsonNode createHeaderNode(String tenantId, String clientReferenceId) {
+    Date nowDate = Date.from(Instant.now());
+    SimpleDateFormat formatter = new SimpleDateFormat("yyyy-MM-dd'T'HH:mm:ss'Z'");
+    String nowDateString = formatter.format(nowDate);
+
+    final JsonNodeFactory factory = JsonNodeFactory.instance;
 
     // Create body-level headers
-    JSONObject headers = new JSONObject();
+    ObjectNode headers = factory.objectNode();
     headers.put("tenantId", tenantId);
     headers.put("requestType", "PreciseIdOnly");
     headers.put("clientReferenceId", clientReferenceId);
+    headers.set("expRequestId", factory.nullNode());
+    headers.put("messageTime", nowDateString);
+    headers.put("txnId", "");
+    headers.put("time", "");
+    headers.set("options", factory.objectNode());
 
-    // Bundle response
-    JSONObject response = new JSONObject();
-    response.put("header", headers);
-    response.put("payload", payload);
-    return response.toString();
+    return headers;
   }
 
   /**
@@ -72,8 +149,8 @@ public class ExperianTranslator {
    * @return a "contacts" object customized with the user's data.
    * @throws IllegalArgumentException if a required field is not present.
    */
-  private static JSONObject createContact(IdentityVerificationRequest userData)
-      throws IllegalArgumentException {
+  private static JsonNode createContact(IdentityVerificationQuestionsRequest userData)
+      throws IllegalArgumentException, JsonProcessingException {
     String firstName = parseString(userData.getFirstName());
     String lastName = parseString(userData.getLastName());
     String middleName = parseOptionalString(userData.getMiddleName());
@@ -87,22 +164,58 @@ public class ExperianTranslator {
     String postal = parseString(userData.getZip());
     String poBoxNumber = parseOptionalString(userData.getPoBoxNumber());
 
-    String requestBody =
-        String.format(
-            INITIAL_REQUEST_CONTACTS,
-            dob,
-            firstName,
-            middleName,
-            lastName,
-            poBoxNumber,
-            street,
-            street2,
-            postTown,
-            postal,
-            stateCode,
-            phone,
-            email);
-    return new JSONObject(requestBody);
+    JsonNode contactNode = _objectMapper.readValue(INITIAL_REQUEST_CONTACTS, ArrayNode.class);
+
+    ObjectNode personDetailsNode = (ObjectNode) contactNode.at("/0/person/personDetails");
+    personDetailsNode.put("dateOfBirth", dob);
+
+    ObjectNode nameNode = (ObjectNode) contactNode.at("/0/person/names/0");
+    nameNode.put("firstName", firstName);
+    if (!"".equals(middleName)) {
+      nameNode.put("middleNames", middleName);
+    }
+    nameNode.put("surName", lastName);
+
+    ObjectNode addressNode = (ObjectNode) contactNode.at("/0/addresses/0");
+    addressNode.put("street", street);
+    if (!"".equals(street2)) {
+      addressNode.put("street2", street2);
+    }
+    if (!"".equals(poBoxNumber)) {
+      addressNode.put("poBoxNumber", poBoxNumber);
+    }
+    addressNode.put("postTown", postTown);
+    addressNode.put("stateProvinceCode", stateCode);
+    addressNode.put("postal", postal);
+
+    ObjectNode emailNode = (ObjectNode) contactNode.at("/0/emails/0");
+    emailNode.put("email", email);
+
+    ObjectNode phoneNode = (ObjectNode) contactNode.at("/0/telephones/0");
+    phoneNode.put("number", phone);
+
+    return contactNode;
+  }
+
+  private static JsonNode createAnswersResponse(IdentityVerificationAnswersRequest answersRequest) {
+    String experianSessionId = parseString(answersRequest.getSessionId());
+
+    final JsonNodeFactory factory = JsonNodeFactory.instance;
+
+    ObjectNode answersNode = factory.objectNode();
+    List<Integer> answerValues = answersRequest.getAnswers();
+    for (int i = 0; i < answerValues.size(); i++) {
+      // 1-based index of answer ("CrossCore - PreciseId (Option 24).pdf" page 76-77)
+      int answerValue = answerValues.get(i);
+      answersNode.put("outWalletAnswer" + (i + 1), String.valueOf(answerValue));
+    }
+
+    ObjectNode kbaResponse = factory.objectNode();
+    kbaResponse.put("sessionId", experianSessionId);
+    kbaResponse.put("outWalletQuestionsRequest", answerValues.size());
+    kbaResponse.set("answers", answersNode);
+
+    return kbaResponse;
   }
 
   private static String parseString(String value) {

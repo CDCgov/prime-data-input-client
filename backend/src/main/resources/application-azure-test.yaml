@@ -15,5 +15,7 @@ simple-report:
       - https://test.simplereport.gov
   dynamics:
     enabled: true
+  experian:
+    enabled: true
 twilio:
   enabled: true

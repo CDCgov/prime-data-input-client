@@ -79,7 +79,7 @@ simple-report:
     from-display-name: SimpleReport Support (CDC)
     account-request-recipient:
       - support@simplereport.gov
-    waitlist-recipient: 
+    waitlist-recipient:
       - support@simplereport.gov
     dynamic-templates:
       # The templates are added and edited at: https://mc.sendgrid.com/dynamic-templates
@@ -95,13 +95,19 @@ simple-report:
     tenant-id: ${DYNAMICS_TENANT_ID:MISSING}
     resource-url: ${DYNAMICS_RESOURCE_URL:MISSING}
   experian:
+    enabled: false
     token-endpoint: ${EXPERIAN_TOKEN_ENDPOINT}
     initial-request-endpoint: ${EXPERIAN_INITIAL_REQUEST_ENDPOINT}
     domain: ${EXPERIAN_DOMAIN}
-    username: ${EXPERIAN_USERNAME}
-    password: ${EXPERIAN_PASSWORD}
     client-id: ${EXPERIAN_CLIENT_ID}
     client-secret: ${EXPERIAN_CLIENT_SECRET}
+    crosscore-subscriber-subcode: ${EXPERIAN_CC_SUBSCRIBER_SUBCODE}
+    crosscore-username: ${EXPERIAN_CC_USERNAME}
+    crosscore-password: ${EXPERIAN_CC_PASSWORD}
+    preciseid-tenant-id: ${EXPERIAN_PID_TENANT_ID}
+    preciseid-client-reference-id: ${EXPERIAN_PID_CLIENT_REFERENCE_ID}
+    preciseid-username: ${EXPERIAN_PID_USERNAME}
+    preciseid-password: ${EXPERIAN_PID_PASSWORD}
   azure-reporting-queue:
     account-name: ${AZURE_REPORTING_QUEUE_ACCOUNT_NAME}
     sas-token: ${AZURE_REPORTING_QUEUE_SAS_TOKEN}
@@ -116,4 +122,3 @@ twilio:
 logging:
   pattern:
     console: "%clr(%d{yyyy-MM-dd HH:mm:ss.SSS}){faint} %clr(%5p) %clr(${PID:- }){magenta} %clr(---){faint} %clr([%15.15t]){faint} [Query: %X{graphql-query}] %clr(%-40.40logger{39}){cyan} %clr(:){faint} %m%n%wEx"
-    
