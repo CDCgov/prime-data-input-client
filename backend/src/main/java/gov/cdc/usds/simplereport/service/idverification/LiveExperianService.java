@@ -87,6 +87,7 @@ public class LiveExperianService
               userData);
       ObjectNode responseEntity = submitExperianRequest(initialRequestBody);
 
+      // look for errors in KIQ response ("CrossCore - PreciseId (Option 24).pdf" page 79)
       int kbaResultCode =
           responseEntity
               .at(
@@ -101,6 +102,7 @@ public class LiveExperianService
         throw new BadRequestException(kbaResultCodeDescription);
       }
 
+      // return KIQ questions and session id
       JsonNode questionsDataNode =
           responseEntity.at(
               "/clientResponsePayload/decisionElements/0/otherData/json/fraudSolutions/response/products/preciseIDServer/kba/questionSet");
@@ -129,6 +131,7 @@ public class LiveExperianService
               answersRequest);
       ObjectNode responseEntity = submitExperianRequest(finalRequestBody);
 
+      // find overall decision ("CrossCore 2.x Technical Developer Guide.pdf" page 28-29)
       String decision = responseEntity.at("/responseHeader/overallResponse/decision").textValue();
 
       // if experian responds with ACCEPT, we will consider the id verification successful

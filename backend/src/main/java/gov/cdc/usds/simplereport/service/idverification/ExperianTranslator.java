@@ -205,6 +205,7 @@ public class ExperianTranslator {
     ObjectNode answersNode = factory.objectNode();
     List<Integer> answerValues = answersRequest.getAnswers();
     for (int i = 0; i < answerValues.size(); i++) {
+      // 1-based index of answer ("CrossCore - PreciseId (Option 24).pdf" page 76-77)
       int answerValue = answerValues.get(i);
       answersNode.put("outWalletAnswer" + (i + 1), String.valueOf(answerValue));
     }
