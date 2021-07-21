@@ -7,7 +7,9 @@ import gov.cdc.usds.simplereport.api.model.accountrequest.IdentityVerificationAn
 import gov.cdc.usds.simplereport.api.model.accountrequest.IdentityVerificationAnswersResponse;
 import gov.cdc.usds.simplereport.api.model.accountrequest.IdentityVerificationQuestionsRequest;
 import gov.cdc.usds.simplereport.api.model.accountrequest.IdentityVerificationQuestionsResponse;
+import gov.cdc.usds.simplereport.properties.SendGridProperties;
 import gov.cdc.usds.simplereport.service.OrganizationService;
+import gov.cdc.usds.simplereport.service.email.EmailService;
 import gov.cdc.usds.simplereport.service.idverification.ExperianService;
 import javax.annotation.PostConstruct;
 import javax.validation.Valid;
@@ -29,8 +31,10 @@ import org.springframework.web.bind.annotation.RestController;
 @RequestMapping(IDENTITY_VERIFICATION)
 public class IdentityVerificationController {
 
+  @Autowired private EmailService _es;
   @Autowired private ExperianService _experianService;
   @Autowired private OrganizationService _orgService;
+  @Autowired private SendGridProperties sendGridProperties;
 
   private static final Logger LOG = LoggerFactory.getLogger(IdentityVerificationController.class);
 
@@ -61,6 +65,13 @@ public class IdentityVerificationController {
       _orgService.setIdentityVerified(requestBody.getOrgExternalId(), true);
     } else {
       verificationResponse.setEmail("fakeemail.updatethis@example.com");
+
+      LOG.info("SEND EMAILS");
+      //      // send summary email to SR support
+      //      String subject = "New account request";
+      //      _es.send(sendGridProperties.getAccountRequestRecipient(), subject, body);
+      //      // send next-steps email to requester
+      //      _es.sendWithProviderTemplate(body.getEmail(), EmailProviderTemplate.ACCOUNT_REQUEST);
     }
 
     return verificationResponse;
