@@ -59,6 +59,8 @@ public class IdentityVerificationController {
     if (verificationResponse.isPassed()) {
       // enable the organization and send response email
       _orgService.setIdentityVerified(requestBody.getOrgExternalId(), true);
+    } else {
+      verificationResponse.setEmail("fakeemail.updatethis@example.com");
     }
 
     return verificationResponse;

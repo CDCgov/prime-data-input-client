@@ -55,21 +55,21 @@ class IdentityVerificationControllerTest {
   @MockBean private CurrentTenantDataAccessContextHolder _mockContextHolder;
 
   private static final String VALID_GET_QUESTIONS_REQUEST =
-      "{\"first-name\":\"Jane\", \"last-name\":\"Doe\", \"date-of-birth\":\"1980-08-12\", \"email\":\"jane@example.com\", \"phone-number\":\"410-867-5309\", \"street-address1\":\"1600 Pennsylvania Ave\", \"city\":\"Washington\", \"state\":\"DC\", \"zip\":\"20500\"}";
+      "{\"firstName\":\"Jane\", \"lastName\":\"Doe\", \"dateOfBirth\":\"1980-08-12\", \"email\":\"jane@example.com\", \"phoneNumber\":\"410-867-5309\", \"streetAddress1\":\"1600 Pennsylvania Ave\", \"city\":\"Washington\", \"state\":\"DC\", \"zip\":\"20500\"}";
 
   private static final String FAKE_ORG_EXTERNAL_ID = "FAKE_ORG_EXTERNAL_ID";
   private static final UUID VALID_SESSION_UUID =
       UUID.fromString("099244e0-bebc-4f59-83fd-453dc7f0b858");
   private static final String SUBMIT_ANSWERS_CORRECT_REQUEST =
-      "{\"org-external-id\": \""
+      "{\"orgExternalId\": \""
           + FAKE_ORG_EXTERNAL_ID
-          + "\", \"session-id\": \""
+          + "\", \"sessionId\": \""
           + VALID_SESSION_UUID
           + "\", \"answers\": [1, 4, 2, 1]}";
   private static final String SUBMIT_ANSWERS_INCORRECT_REQUEST =
-      "{\"org-external-id\": \""
+      "{\"orgExternalId\": \""
           + FAKE_ORG_EXTERNAL_ID
-          + "\", \"session-id\": \""
+          + "\", \"sessionId\": \""
           + VALID_SESSION_UUID
           + "\", \"answers\": [4, 3, 2, 1]}";
 
