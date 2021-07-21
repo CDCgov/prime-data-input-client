@@ -7,13 +7,13 @@ import static org.junit.jupiter.api.Assertions.assertTrue;
 import static org.mockito.ArgumentMatchers.any;
 import static org.mockito.ArgumentMatchers.anySet;
 import static org.mockito.ArgumentMatchers.eq;
+import static org.mockito.ArgumentMatchers.startsWith;
 import static org.mockito.Mockito.mock;
 import static org.mockito.Mockito.times;
 import static org.mockito.Mockito.verify;
 import static org.mockito.Mockito.verifyNoInteractions;
 import static org.mockito.Mockito.when;
 import static org.springframework.test.web.servlet.request.MockMvcRequestBuilders.post;
-import static org.springframework.test.web.servlet.result.MockMvcResultMatchers.jsonPath;
 import static org.springframework.test.web.servlet.result.MockMvcResultMatchers.status;
 
 import com.sendgrid.helpers.mail.Mail;
@@ -111,7 +111,9 @@ class AccountRequestControllerTest {
   @Captor private ArgumentCaptor<StreetAddress> addressCaptor;
   @Captor private ArgumentCaptor<AccountRequest> accountRequestCaptor;
 
-  private static final String FAKE_ORG_EXTERNAL_ID = "FAKE_ORG_EXTERNAL_ID";
+  private static final String FAKE_ORG_EXTERNAL_ID_PREFIX = "RI-Day-Hayes-Trading-";
+  private static final String FAKE_ORG_EXTERNAL_ID =
+      FAKE_ORG_EXTERNAL_ID_PREFIX + "09e05f77-8765-48bb-adcb-96819af7aa32";
 
   @Test
   void waitlistIsOk() throws Exception {
@@ -179,7 +181,18 @@ class AccountRequestControllerTest {
     UUID deviceUuid4 = UUID.randomUUID();
     UUID acctRequestApiUserUuid = UUID.randomUUID();
     when(orgService.createOrganization(
-            any(), any(), any(), any(), any(), any(), any(), any(), any(), any(), any(), any(),
+            any(),
+            any(),
+            startsWith(FAKE_ORG_EXTERNAL_ID_PREFIX),
+            any(),
+            any(),
+            any(),
+            any(),
+            any(),
+            any(),
+            any(),
+            any(),
+            any(),
             any()))
         .thenReturn(organization);
     when(orgService.getOrganization(any())).thenReturn(organization);
@@ -232,11 +245,9 @@ class AccountRequestControllerTest {
             .characterEncoding("UTF-8")
             .content(requestBody);
 
-    this._mockMvc
-        .perform(builder)
-        .andExpect(status().isOk())
-        .andExpect(
-            jsonPath("$.orgExternalId", org.hamcrest.Matchers.equalTo(FAKE_ORG_EXTERNAL_ID)));
+    this._mockMvc.perform(builder).andExpect(status().isOk());
+    //        .andExpect(
+    //            jsonPath("$.orgExternalId", org.hamcrest.Matchers.equalTo(FAKE_ORG_EXTERNAL_ID)));
 
     // mail 1: to us (contains formatted request data)
     verify(emailService, times(1))
@@ -299,7 +310,7 @@ class AccountRequestControllerTest {
     assertNull(nameCaptor.getValue().getMiddleName());
     assertThat(nameCaptor.getValue().getLastName()).isEqualTo("Lopez");
     assertNull(nameCaptor.getValue().getSuffix());
-    assertThat(externalIdCaptor.getValue()).startsWith("RI-Day-Hayes-Trading-");
+    assertThat(externalIdCaptor.getValue()).isEqualTo(FAKE_ORG_EXTERNAL_ID);
 
     verify(orgService, times(1))
         .createOrganization(
