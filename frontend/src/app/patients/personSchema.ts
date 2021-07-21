@@ -91,6 +91,9 @@ export function isValidBirthdate(date: string | undefined) {
   if (date === undefined) {
     return false;
   }
+  if (date.split("/").length === 3 && date.split("/")[2].length < 4) {
+    return false;
+  }
   const parsedDate = moment(date);
   if (!parsedDate.isValid()) {
     return false;

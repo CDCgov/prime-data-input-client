@@ -28,6 +28,14 @@ public class FlexibleDateScalarTypeTest {
   }
 
   @Test
+  void convertImpl_twoDigitYear() {
+    LocalDate lastCentury = LocalDate.parse("1961-10-12");
+    LocalDate thisCentury = LocalDate.parse("2005-05-04");
+    assertEquals(lastCentury, converter.convertImpl("10/12/61"));
+    assertEquals(thisCentury, converter.convertImpl("5/4/05"));
+  }
+
+  @Test
   void convertImpl_returnsNullOnNoSeparators() {
     assertNull(null, converter.convertImpl("20000101"));
   }

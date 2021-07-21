@@ -95,4 +95,8 @@ describe("isValidBirthdate", () => {
     expect(isValidBirthdate("1-2-1923")).toBeTruthy();
     expect(isValidBirthdate("01-02-1923")).toBeTruthy();
   });
+
+  it("returns false for two-digit years", () => {
+    expect(isValidBirthdate("1/2/23")).toBeFalsy();
+  });
 });

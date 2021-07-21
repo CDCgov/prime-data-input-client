@@ -7,6 +7,7 @@ import graphql.schema.CoercingParseValueException;
 import graphql.schema.CoercingSerializeException;
 import graphql.schema.GraphQLScalarType;
 import java.time.LocalDate;
+import java.time.Period;
 import java.time.format.DateTimeFormatter;
 import org.springframework.context.annotation.Bean;
 import org.springframework.context.annotation.Configuration;
@@ -15,10 +16,18 @@ class FlexibleDateCoercion implements Coercing<Object, Object> {
   private static final DateTimeFormatter US_DASHDATE_FORMATTER = DateTimeFormatter.ISO_LOCAL_DATE;
   private static final DateTimeFormatter US_SLASHDATE_FORMATTER =
       DateTimeFormatter.ofPattern("M/d/yyyy");
+  private static final DateTimeFormatter US_SLASHDATE_TWO_DIGIT_YEAR_FORMATTER =
+      DateTimeFormatter.ofPattern("M/d/yy");
+  private static int CENTURY = 100;
 
   LocalDate convertImpl(Object input) {
     if (input instanceof String) {
       if (((String) input).contains("/")) {
+        String[] dateParts = ((String) input).split("/");
+        if (dateParts[2].length() == 2) {
+          LocalDate date = LocalDate.parse((String) input, US_SLASHDATE_TWO_DIGIT_YEAR_FORMATTER);
+          return date.isBefore(LocalDate.now()) ? date : date.minus(Period.ofYears(CENTURY));
+        }
         return LocalDate.parse((String) input, US_SLASHDATE_FORMATTER);
       } else if (((String) input).contains("-")) {
         return LocalDate.parse((String) input, US_DASHDATE_FORMATTER);
