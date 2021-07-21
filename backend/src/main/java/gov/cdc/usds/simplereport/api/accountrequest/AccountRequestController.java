@@ -89,7 +89,8 @@ public class AccountRequestController {
   /** Read the waitlist request and generate an email body, then send with the emailService */
   @PostMapping("/waitlist")
   public void submitWaitlistRequest(
-      @Valid @RequestBody WaitlistRequest body, HttpServletRequest request) throws IOException {
+      @Valid @RequestBody WaitlistRequest body, HttpServletRequest request)
+      throws IOException {
     String subject = "New waitlist request";
     if (LOG.isInfoEnabled()) {
       LOG.info("Waitlist request submitted: {}", objectMapper.writeValueAsString(body));
@@ -103,7 +104,9 @@ public class AccountRequestController {
    */
   @PostMapping("")
   @Transactional(readOnly = false)
-  public void submitAccountRequest(@Valid @RequestBody AccountRequest body) throws IOException {
+  public void submitAccountRequest(
+      @Valid @RequestBody AccountRequest body, HttpServletRequest request)
+      throws IOException {
     try {
       Map<String, String> reqVars = convertAccountRequestToMap(body);
       Organization org = checkAccountRequestAndCreateOrg(reqVars);
@@ -134,7 +137,8 @@ public class AccountRequestController {
    */
   @PostMapping("/organization-create")
   @Transactional(readOnly = false)
-  public AccountResponse submitAccountRequestV2(@Valid @RequestBody AccountRequest body)
+  public AccountResponse submitAccountRequestV2(
+      @Valid @RequestBody AccountRequest body, HttpServletRequest request)
       throws IOException {
     try {
       Map<String, String> reqVars = convertAccountRequestToMap(body);
