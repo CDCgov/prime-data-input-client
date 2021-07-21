@@ -29,8 +29,10 @@ public class LiveExperianService
     implements gov.cdc.usds.simplereport.service.idverification.ExperianService {
 
   private static final String SUCCESS_DECISION = "ACCEPT";
+  private static final int KBA_SUCCESS_RESULT_CODE = 0;
+
   private final ExperianProperties _experianProperties;
-  private RestTemplate _restTemplate;
+  private final RestTemplate _restTemplate;
 
   @Autowired
   public LiveExperianService(final ExperianProperties experianProperties) {
@@ -90,7 +92,7 @@ public class LiveExperianService
               .at(
                   "/clientResponsePayload/decisionElements/0/otherData/json/fraudSolutions/response/products/preciseIDServer/kbascore/general/kbaresultCode")
               .asInt();
-      if (kbaResultCode == 9) {
+      if (kbaResultCode != KBA_SUCCESS_RESULT_CODE) {
         String kbaResultCodeDescription =
             responseEntity
                 .at(
